@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "env": {
+    "STRIPE_SECRET_KEY": "@stripe-secret-key",
+    "STRIPE_WEBHOOK_SECRET": "@stripe-webhook-secret",
+    "STRIPE_PRICE_STARTER": "@stripe-price-starter",
+    "STRIPE_PRICE_PRO": "@stripe-price-pro",
+    "SUPABASE_URL": "@supabase-url",
+    "SUPABASE_SERVICE_KEY": "@supabase-service-key",
+    "DOMAIN": "https://timetobook.vercel.app"
+  },
+  "functions": {
+    "api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  }
+}
+

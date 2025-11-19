@@ -1,0 +1,32 @@
+{
+  "name": "timetobook",
+  "version": "1.0.0",
+  "description": "Solution de réservation en ligne pour salons de coiffure",
+  "main": "index.html",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "deploy": "vercel --prod",
+    "deploy:test": "vercel",
+    "logs": "vercel logs timetobook",
+    "inspect": "vercel inspect"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "body-parser": "^2.2.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "stripe": "^14.9.0"
+  },
+  "keywords": [
+    "reservation",
+    "booking",
+    "salon",
+    "coiffure",
+    "saas",
+    "stripe",
+    "supabase"
+  ],
+  "author": "TimeToBook",
+  "license": "MIT"
+}

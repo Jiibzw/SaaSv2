@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimeToBook - Réservation en ligne pour salons de coiffure</title>
+    <meta name="description" content="TimeToBook - Solution de réservation en ligne pour salons de coiffure. Simple, rapide et efficace.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 1.05em;
+            opacity: 0.95;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+            transform: translateY(-2px);
+            text-shadow: 0 2px 10px rgba(255,255,255,0.3);
+        }
+
+        .btn-contact {
+            background: white;
+            color: #000000 !important;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-contact:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(255, 255, 255, 0.5);
+            background: #f8f9fa;
+            color: #000000 !important;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 100px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.8s ease;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .hero p {
+            font-size: 1.5em;
+            margin-bottom: 40px;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero-features {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 60px;
+            flex-wrap: wrap;
+        }
+
+        .hero-feature {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 25px 35px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            animation: fadeInUp 1.2s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px 40px;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #343a40;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 60px;
+            color: #6c757d;
+        }
+
+        .salons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 35px;
+            margin-bottom: 80px;
+        }
+
+        .salon-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            border: 1px solid #e9ecef;
+        }
+
+        .salon-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+        }
+
+        .salon-header {
+            padding: 50px 30px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .salon-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            animation: ripple 3s infinite;
+        }
+
+        .salon-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .salon-card.elegance .salon-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .salon-card.studio .salon-header {
+            background: linear-gradient(135deg, #e63946 0%, #f1faee 100%);
+        }
+
+        .salon-card.beaute .salon-header {
+            background: linear-gradient(135deg, #2a9d8f 0%, #264653 100%);
+        }
+
+        .salon-card.moderne .salon-header {
+            background: linear-gradient(135deg, #f77f00 0%, #003049 100%);
+        }
+
+        .salon-card.chic .salon-header {
+            background: linear-gradient(135deg, #c9184a 0%, #800f2f 100%);
+        }
+
+        .salon-header h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .salon-body {
+            padding: 30px;
+            background: white;
+        }
+
+        .salon-info {
+            margin-bottom: 20px;
+        }
+
+        .salon-info p {
+            color: #495057;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .salon-services {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .service-tag {
+            background: #f0f4ff;
+            color: #667eea;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .salon-card.studio .service-tag {
+            background: #fff5f5;
+            color: #e63946;
+        }
+
+        .salon-card.beaute .service-tag {
+            background: #f0fdf4;
+            color: #2a9d8f;
+        }
+
+        .salon-card.moderne .service-tag {
+            background: #fff7ed;
+            color: #f77f00;
+        }
+
+        .salon-card.chic .service-tag {
+            background: #fff1f2;
+            color: #c9184a;
+        }
+
+        .btn-reserve {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-reserve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .features-section {
+            background: #f8f9fa;
+            padding: 80px 40px;
+            margin: 80px 0;
+            border-radius: 30px;
+        }
+
+        .features-section h2 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #343a40;
+        }
+
+        .features-section .subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            color: #6c757d;
+            margin-bottom: 60px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 30px;
+            border-radius: 15px;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            color: #343a40;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .feature-card p {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 80px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 30px;
+            margin: 80px 0;
+            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.3);
+        }
+
+        .cta-section h2 {
+            font-size: 3em;
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .cta-section p {
+            font-size: 1.3em;
+            color: white;
+            opacity: 0.95;
+            margin-bottom: 40px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-cta {
+            padding: 18px 40px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border-radius: 30px;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary-cta {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary-cta:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255,255,255,0.3);
+        }
+
+        .btn-secondary-cta {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary-cta:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            color: #6c757d;
+            text-align: center;
+            padding: 40px;
+            margin-top: 80px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .footer p {
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .footer-links a {
+            color: #6c757d;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: translate(0, 0);
+            }
+            50% {
+                transform: translate(10px, 10px);
+            }
+            100% {
+                transform: translate(0, 0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5em;
+            }
+
+            .hero p {
+                font-size: 1.2em;
+            }
+
+            .salons-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .cta-section h2 {
+                font-size: 2em;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">⏰ TimeToBook</div>
+            <div class="nav-links">
+                <a href="#accueil">Accueil</a>
+                <a href="#salons">Nos Salons</a>
+                <a href="#fonctionnalites">Fonctionnalités</a>
+                <a href="./contact.html" class="btn-contact">📞 Demander un devis</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero" id="accueil">
+        <h1>⏰ TimeToBook</h1>
+        <p>La solution de réservation en ligne pour salons de coiffure</p>
+        <div class="hero-features">
+            <div class="hero-feature">✂️ Réservation 24/7</div>
+            <div class="hero-feature">📱 Simple & Rapide</div>
+            <div class="hero-feature">💼 Gestion Automatisée</div>
+        </div>
+    </section>
+
+    <div class="container">
+        <h2 class="section-title" id="salons">💇 Nos Salons Partenaires</h2>
+        <p class="section-subtitle">Découvrez nos salons de coiffure et réservez en quelques clics</p>
+
+        <div class="salons-grid">
+            <a href="./elegance/" class="salon-card elegance">
+                <div class="salon-header">
+                    <div class="salon-icon">💜</div>
+                    <h2>Salon Élégance</h2>
+                </div>
+                <div class="salon-body">
+                    <div class="salon-info">
+                        <p>📍 12 Rue de la Paix, 75002 Paris</p>
+                        <p>📞 01 42 86 82 00</p>
+                        <p>⭐ Coiffure tendance et élégante</p>
+                    </div>
+                    <div class="salon-services">
+                        <span class="service-tag">Coupe Femme</span>
+                        <span class="service-tag">Coupe Homme</span>
+                        <span class="service-tag">Coloration</span>
+                    </div>
+                    <button class="btn-reserve">Réserver maintenant →</button>
+                </div>
+            </a>
+
+            <a href="./studio/" class="salon-card studio">
+                <div class="salon-header">
+                    <div class="salon-icon">❤️</div>
+                    <h2>Studio Coiffure</h2>
+                </div>
+                <div class="salon-body">
+                    <div class="salon-info">
+                        <p>📍 45 Avenue des Champs-Élysées, 75008 Paris</p>
+                        <p>📞 01 55 22 33 44</p>
+                        <p>⭐ Salon tendance sur les Champs</p>
+                    </div>
+                    <div class="salon-services">
+                        <span class="service-tag">Coupe & Style</span>
+                        <span class="service-tag">Balayage</span>
+                        <span class="service-tag">Barbe</span>
+                    </div>
+                    <button class="btn-reserve">Réserver maintenant →</button>
+                </div>
+            </a>
+
+            <a href="./beaute/" class="salon-card beaute">
+                <div class="salon-header">
+                    <div class="salon-icon">💚</div>
+                    <h2>Institut Beauté</h2>
+                </div>
+                <div class="salon-body">
+                    <div class="salon-info">
+                        <p>📍 8 Rue Saint-Honoré, 75001 Paris</p>
+                        <p>📞 01 44 77 88 99</p>
+                        <p>⭐ Coiffure et bien-être zen</p>
+                    </div>
+                    <div class="salon-services">
+                        <span class="service-tag">Coupe Classique</span>
+                        <span class="service-tag">Coloration Bio</span>
+                        <span class="service-tag">Spa Capillaire</span>
+                    </div>
+                    <button class="btn-reserve">Réserver maintenant →</button>
+                </div>
+            </a>
+
+            <a href="./moderne/" class="salon-card moderne">
+                <div class="salon-header">
+                    <div class="salon-icon">🧡</div>
+                    <h2>Salon Moderne</h2>
+                </div>
+                <div class="salon-body">
+                    <div class="salon-info">
+                        <p>📍 22 Boulevard Haussmann, 75009 Paris</p>
+                        <p>📞 01 88 99 00 11</p>
+                        <p>⭐ Techniques innovantes</p>
+                    </div>
+                    <div class="salon-services">
+                        <span class="service-tag">Coupe Design</span>
+                        <span class="service-tag">Coloration Fantaisie</span>
+                        <span class="service-tag">Extensions</span>
+                    </div>
+                    <button class="btn-reserve">Réserver maintenant →</button>
+                </div>
+            </a>
+
+            <a href="./chic/" class="salon-card chic">
+                <div class="salon-header">
+                    <div class="salon-icon">💗</div>
+                    <h2>Salon Chic</h2>
+                </div>
+                <div class="salon-body">
+                    <div class="salon-info">
+                        <p>📍 15 Rue de Rivoli, 75004 Paris</p>
+                        <p>📞 01 77 66 55 44</p>
+                        <p>⭐ Élégance et raffinement</p>
+                    </div>
+                    <div class="salon-services">
+                        <span class="service-tag">Coupe VIP</span>
+                        <span class="service-tag">Coloration Luxe</span>
+                        <span class="service-tag">Coiffure Soirée</span>
+                    </div>
+                    <button class="btn-reserve">Réserver maintenant →</button>
+                </div>
+            </a>
+        </div>
+
+        <div class="features-section" id="fonctionnalites">
+            <h2>✨ Pourquoi choisir TimeToBook ?</h2>
+            <p class="subtitle">Une solution complète pour gérer vos réservations</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Simple & Intuitif</h3>
+                    <p>Interface moderne et facile à utiliser. Réservez en 3 clics depuis n'importe quel appareil.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔔</div>
+                    <h3>Notifications Auto</h3>
+                    <p>Rappels SMS et email automatiques pour les clients. Réduisez les no-shows de 80%.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Statistiques</h3>
+                    <p>Dashboard complet pour suivre vos performances et optimiser votre activité.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">⏰</div>
+                    <h3>Disponibilité 24/7</h3>
+                    <p>Vos clients peuvent réserver à tout moment, même quand vous êtes fermé.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Sécurisé</h3>
+                    <p>Données cryptées et conformes RGPD. Votre activité et vos clients sont protégés.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <h2>🚀 Prêt à digitaliser votre salon ?</h2>
+            <p>Rejoignez les centaines de salons qui ont déjà fait confiance à TimeToBook</p>
+            <div class="cta-buttons">
+                <a href="./contact.html" class="btn-cta btn-primary-cta">
+                    📞 Demander un devis gratuit
+                </a>
+                <a href="#salons" class="btn-cta btn-secondary-cta">
+                    👀 Voir une démo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 TimeToBook - Tous droits réservés</p>
+        <div class="footer-links">
+            <a href="./contact.html">Contact</a>
+            <a href="#salons">Nos Salons</a>
+            <a href="#fonctionnalites">Fonctionnalités</a>
+            <a href="./mentions-legales.html">Mentions légales</a>
+            <a href="./cgu.html">CGU</a>
+        </div>
+        <p style="margin-top: 20px; font-size: 0.9em;">
+            Made with 💜 by TimeToBook Team
+        </p>
+    </footer>
+</body>
+</html>
