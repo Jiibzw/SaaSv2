@@ -765,43 +765,39 @@
             return 'salon_' + salonId + '_' + key;
         }
 
-        function getCoiffeurs() {
-            var stored = localStorage.getItem(getStorageKey('coiffeurs'));
-            if (!stored) {
-                var defaultCoiffeurs = [
-                    {id: 1, prenom: 'Sophie', nom: 'Martin', specialite: 'Coupe & Coloration', actif: true},
-                    {id: 2, prenom: 'Lucas', nom: 'Dubois', specialite: 'Coupe homme & Barbe', actif: true},
-                    {id: 3, prenom: 'Emma', nom: 'Rousseau', specialite: 'Coiffure de mariage', actif: true}
-                ];
-                localStorage.setItem(getStorageKey('coiffeurs'), JSON.stringify(defaultCoiffeurs));
-                return defaultCoiffeurs;
+        async function getCoiffeurs() {
+            try {
+                const response = await fetch('/api/bookings/coiffeurs?salon_id=' + salonId);
+                if (!response.ok) throw new Error('Erreur chargement coiffeurs');
+                return await response.json();
+            } catch (e) {
+                console.error(e);
+                return [];
             }
-            return JSON.parse(stored);
         }
 
-        function saveCoiffeurs(coiffeurs) {
-            localStorage.setItem(getStorageKey('coiffeurs'), JSON.stringify(coiffeurs));
+        async function getRendezVous() {
+            try {
+                const response = await fetch('/api/bookings?salon_id=' + salonId);
+                if (!response.ok) throw new Error('Erreur chargement RDV');
+                return await response.json();
+            } catch (e) {
+                console.error(e);
+                return [];
+            }
         }
 
-        function getRendezVous() {
-            var stored = localStorage.getItem(getStorageKey('rendezvous'));
-            return stored ? JSON.parse(stored) : [];
+        async function refreshDashboard() {
+            await updateStats();
+            await renderRdvList();
+            await renderCoiffeurList();
         }
 
-        function saveRendezVous(rdvs) {
-            localStorage.setItem(getStorageKey('rendezvous'), JSON.stringify(rdvs));
-        }
-
-        function refreshDashboard() {
-            updateStats();
-            renderRdvList();
-            renderCoiffeurList();
-        }
-
-        function updateStats() {
-            var rdvs = getRendezVous();
-            var coiffeurs = getCoiffeurs();
-            var today = new Date().toISOString().split('T')[0];
+        async function updateStats() {
+            var rdvs = await getRendezVous();
+            var coiffeurs = await getCoiffeurs();
+            var d = new Date();
+            var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 
             var todayRdv = 0;
             for (var i = 0; i < rdvs.length; i++) {
@@ -812,19 +808,19 @@
 
             var weekEnd = new Date();
             weekEnd.setDate(weekEnd.getDate() + 7);
-            var weekEndStr = weekEnd.toISOString().split('T')[0];
+            var weekEndStr = weekEnd.getFullYear() + '-' + String(weekEnd.getMonth() + 1).padStart(2, '0') + '-' + String(weekEnd.getDate()).padStart(2, '0');
 
             var weekRdv = 0;
             for (var j = 0; j < rdvs.length; j++) {
-                if (rdvs[j].date >= today && rdvs[j].date <= weekEndStr && rdvs[j].statut !== 'annule') {
+                if (rdvs[j].date > today && rdvs[j].date <= weekEndStr && rdvs[j].statut !== 'annule') {
                     weekRdv++;
                 }
             }
 
             var uniqueClients = [];
             for (var k = 0; k < rdvs.length; k++) {
-                if (uniqueClients.indexOf(rdvs[k].clientTel) === -1) {
-                    uniqueClients.push(rdvs[k].clientTel);
+                if (uniqueClients.indexOf(rdvs[k].client_tel) === -1) {
+                    uniqueClients.push(rdvs[k].client_tel);
                 }
             }
 
@@ -857,11 +853,12 @@
             renderRdvList();
         }
 
-        function renderRdvList() {
+        async function renderRdvList() {
             var container = document.getElementById('admin-rdv-list');
-            var rdvs = getRendezVous();
-            var coiffeurs = getCoiffeurs();
-            var today = new Date().toISOString().split('T')[0];
+            var rdvs = await getRendezVous();
+            var coiffeurs = await getCoiffeurs();
+            var d = new Date();
+            var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 
             var filteredRdv = [];
 
@@ -874,10 +871,10 @@
             } else if (currentFilter === 'week') {
                 var weekEnd = new Date();
                 weekEnd.setDate(weekEnd.getDate() + 7);
-                var weekEndStr = weekEnd.toISOString().split('T')[0];
+                var weekEndStr = weekEnd.getFullYear() + '-' + String(weekEnd.getMonth() + 1).padStart(2, '0') + '-' + String(weekEnd.getDate()).padStart(2, '0');
 
                 for (var j = 0; j < rdvs.length; j++) {
-                    if (rdvs[j].date >= today && rdvs[j].date <= weekEndStr) {
+                    if (rdvs[j].date > today && rdvs[j].date <= weekEndStr) {
                         filteredRdv.push(rdvs[j]);
                     }
                 }
@@ -899,7 +896,7 @@
                 var coiffeur = null;
 
                 for (var m = 0; m < coiffeurs.length; m++) {
-                    if (coiffeurs[m].id === rdv.coiffeurId) {
+                    if (coiffeurs[m].id === rdv.coiffeur_id) {
                         coiffeur = coiffeurs[m];
                         break;
                     }
@@ -932,8 +929,8 @@
                 item.className = 'rdv-item ' + statusClass;
                 item.innerHTML = '<div class="rdv-info">' +
                     '<h4>' + rdv.heure + ' - ' + dateFormatted + '</h4>' +
-                    '<p><strong>Client:</strong> ' + rdv.clientPrenom + ' ' + rdv.clientNom + '</p>' +
-                    '<p><strong>Telephone:</strong> ' + rdv.clientTel + '</p>' +
+                    '<p><strong>Client:</strong> ' + rdv.client_prenom + ' ' + rdv.client_nom + '</p>' +
+                    '<p><strong>Telephone:</strong> ' + rdv.client_tel + '</p>' +
                     '<p><strong>Coiffeur:</strong> ' + coiffeur.prenom + ' ' + coiffeur.nom + '</p>' +
                     '<span class="badge ' + statusBadge + '">' + statusText + '</span>' +
                     '</div>' +
@@ -945,37 +942,42 @@
             }
         }
 
-        function validerRdv(rdvId) {
-            var rdvs = getRendezVous();
-            for (var i = 0; i < rdvs.length; i++) {
-                if (rdvs[i].id === rdvId) {
-                    rdvs[i].statut = 'confirme';
-                    saveRendezVous(rdvs);
-                    console.log('SMS de confirmation envoye a ' + rdvs[i].clientTel);
+        async function validerRdv(rdvId) {
+            try {
+                const response = await fetch('/api/bookings', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: rdvId, statut: 'confirme' })
+                });
+                if (response.ok) {
                     refreshDashboard();
-                    break;
                 }
+            } catch (e) {
+                console.error(e);
+                alert('Erreur lors de la validation');
             }
         }
 
-        function annulerRdv(rdvId) {
+        async function annulerRdv(rdvId) {
             if (!confirm('Voulez-vous vraiment annuler ce rendez-vous ?')) return;
-
-            var rdvs = getRendezVous();
-            for (var i = 0; i < rdvs.length; i++) {
-                if (rdvs[i].id === rdvId) {
-                    rdvs[i].statut = 'annule';
-                    saveRendezVous(rdvs);
-                    console.log('SMS d annulation envoye a ' + rdvs[i].clientTel);
+            try {
+                const response = await fetch('/api/bookings', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: rdvId, statut: 'annule' })
+                });
+                if (response.ok) {
                     refreshDashboard();
-                    break;
                 }
+            } catch (e) {
+                console.error(e);
+                alert('Erreur lors de l\'annulation');
             }
         }
 
-        function renderCoiffeurList() {
+        async function renderCoiffeurList() {
             var container = document.getElementById('admin-coiffeur-list');
-            var coiffeurs = getCoiffeurs();
+            var coiffeurs = await getCoiffeurs();
             container.innerHTML = '';
 
             for (var i = 0; i < coiffeurs.length; i++) {
@@ -987,7 +989,7 @@
                     '<p>' + coiffeur.specialite + '</p>' +
                     '</div>' +
                     '<div class="coiffeur-actions">' +
-                    '<button class="btn ' + (coiffeur.actif ? 'btn-warning' : 'btn-success') + '" onclick="toggleCoiffeur(' + coiffeur.id + ')">' +
+                    '<button class="btn ' + (coiffeur.actif ? 'btn-warning' : 'btn-success') + '" onclick="toggleCoiffeur(' + coiffeur.id + ', ' + coiffeur.actif + ')">' +
                     (coiffeur.actif ? '⏸ Desactiver' : '▶ Activer') +
                     '</button>' +
                     '<button class="btn btn-danger" onclick="deleteCoiffeur(' + coiffeur.id + ')">🗑️ Supprimer</button>' +
@@ -996,28 +998,32 @@
             }
         }
 
-        function toggleCoiffeur(coiffeurId) {
-            var coiffeurs = getCoiffeurs();
-            for (var i = 0; i < coiffeurs.length; i++) {
-                if (coiffeurs[i].id === coiffeurId) {
-                    coiffeurs[i].actif = !coiffeurs[i].actif;
-                    saveCoiffeurs(coiffeurs);
+        async function toggleCoiffeur(coiffeurId, currentStatus) {
+            try {
+                const response = await fetch('/api/bookings/coiffeurs', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: coiffeurId, actif: !currentStatus })
+                });
+                if (response.ok) {
                     refreshDashboard();
-                    break;
                 }
+            } catch (e) {
+                console.error(e);
+                alert('Erreur lors de la modification');
             }
         }
 
-        function deleteCoiffeur(coiffeurId) {
+        async function deleteCoiffeur(coiffeurId) {
             if (!confirm('Voulez-vous vraiment supprimer ce coiffeur ?')) return;
 
-            var coiffeurs = getCoiffeurs();
-            var rdvs = getRendezVous();
-            var today = new Date().toISOString().split('T')[0];
+            var rdvs = await getRendezVous();
+            var d = new Date();
+            var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 
             var futureRdv = [];
             for (var i = 0; i < rdvs.length; i++) {
-                if (rdvs[i].coiffeurId === coiffeurId && 
+                if (rdvs[i].coiffeur_id === coiffeurId && 
                     rdvs[i].date >= today &&
                     rdvs[i].statut !== 'annule') {
                     futureRdv.push(rdvs[i]);
@@ -1026,23 +1032,29 @@
 
             if (futureRdv.length > 0) {
                 if (!confirm('Ce coiffeur a ' + futureRdv.length + ' rendez-vous futurs. Continuer ?')) return;
-                for (var j = 0; j < rdvs.length; j++) {
-                    if (rdvs[j].coiffeurId === coiffeurId && rdvs[j].date >= today) {
-                        rdvs[j].statut = 'annule';
-                    }
-                }
-                saveRendezVous(rdvs);
-            }
-
-            var newCoiffeurs = [];
-            for (var k = 0; k < coiffeurs.length; k++) {
-                if (coiffeurs[k].id !== coiffeurId) {
-                    newCoiffeurs.push(coiffeurs[k]);
+                // Annuler les RDV futurs
+                for (var j = 0; j < futureRdv.length; j++) {
+                    await fetch('/api/bookings', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: futureRdv[j].id, statut: 'annule' })
+                    });
                 }
             }
 
-            saveCoiffeurs(newCoiffeurs);
-            refreshDashboard();
+            try {
+                const response = await fetch('/api/bookings/coiffeurs', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: coiffeurId })
+                });
+                if (response.ok) {
+                    refreshDashboard();
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Erreur lors de la suppression');
+            }
         }
 
         function showAddCoiffeurModal() {
@@ -1054,27 +1066,34 @@
             document.getElementById('add-coiffeur-form').reset();
         }
 
-        document.getElementById('add-coiffeur-form').addEventListener('submit', function(e) {
+        document.getElementById('add-coiffeur-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            var coiffeurs = getCoiffeurs();
-            var maxId = 0;
-            for (var i = 0; i < coiffeurs.length; i++) {
-                if (coiffeurs[i].id > maxId) maxId = coiffeurs[i].id;
-            }
-
             var newCoiffeur = {
-                id: maxId + 1,
+                salon_id: salonId,
                 prenom: document.getElementById('new-coiffeur-prenom').value,
                 nom: document.getElementById('new-coiffeur-nom').value,
                 specialite: document.getElementById('new-coiffeur-specialite').value,
                 actif: true
             };
 
-            coiffeurs.push(newCoiffeur);
-            saveCoiffeurs(coiffeurs);
-            closeAddCoiffeurModal();
-            refreshDashboard();
+            try {
+                const response = await fetch('/api/bookings/coiffeurs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newCoiffeur)
+                });
+                
+                if (response.ok) {
+                    closeAddCoiffeurModal();
+                    refreshDashboard();
+                } else {
+                    alert('Erreur lors de l\'ajout');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Erreur lors de l\'ajout');
+            }
         });
 
         document.getElementById('btn-logout').addEventListener('click', logout);

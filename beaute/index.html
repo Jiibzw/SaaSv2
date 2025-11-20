@@ -726,15 +726,14 @@
             submitBtn.disabled = true;
             submitBtn.textContent = '⏳ Réservation en cours...';
 
-            setTimeout(function() {
-                submitBooking();
+            submitBooking().then(function() {
                 formSubmitting = false;
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
-            }, 1000);
+            });
         });
 
-        function submitBooking() {
+        async function submitBooking() {
             var prenom = document.getElementById('prenom').value;
             var nom = document.getElementById('nom').value;
             var tel = document.getElementById('telephone').value;
@@ -755,33 +754,40 @@
                 year: 'numeric'
             });
 
-            // Sauvegarde dans le localStorage pour l'admin
-            var storageKey = 'salon_' + SALON_ID + '_rendezvous';
-            var storedRdvs = localStorage.getItem(storageKey);
-            var rdvs = storedRdvs ? JSON.parse(storedRdvs) : [];
+            try {
+                const response = await fetch('/api/bookings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        salon_id: SALON_ID,
+                        date: selectedDate,
+                        heure: selectedTime,
+                        client_prenom: prenom,
+                        client_nom: nom,
+                        client_tel: tel,
+                        coiffeur_id: selectedCoiffeur
+                    })
+                });
 
-            var newRdv = {
-                id: Date.now(),
-                date: selectedDate,
-                heure: selectedTime,
-                clientPrenom: prenom,
-                clientNom: nom,
-                clientTel: tel,
-                coiffeurId: selectedCoiffeur,
-                statut: 'en_attente'
-            };
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erreur lors de la sauvegarde');
+                }
 
-            rdvs.push(newRdv);
-            localStorage.setItem(storageKey, JSON.stringify(rdvs));
+                document.getElementById('confirmation-details').innerHTML = 
+                    '<p><strong>Client :</strong> ' + prenom + ' ' + nom + '</p>' +
+                    '<p><strong>Coiffeur :</strong> ' + coiffeur.prenom + ' ' + coiffeur.nom + '</p>' +
+                    '<p><strong>Date :</strong> ' + dateStr + '</p>' +
+                    '<p><strong>Heure :</strong> ' + selectedTime + '</p>' +
+                    '<p><strong>Téléphone :</strong> ' + tel + '</p>';
 
-            document.getElementById('confirmation-details').innerHTML = 
-                '<p><strong>Client :</strong> ' + prenom + ' ' + nom + '</p>' +
-                '<p><strong>Coiffeur :</strong> ' + coiffeur.prenom + ' ' + coiffeur.nom + '</p>' +
-                '<p><strong>Date :</strong> ' + dateStr + '</p>' +
-                '<p><strong>Heure :</strong> ' + selectedTime + '</p>' +
-                '<p><strong>Téléphone :</strong> ' + tel + '</p>';
-
-            document.getElementById('modal-confirmation').classList.add('active');
+                document.getElementById('modal-confirmation').classList.add('active');
+            } catch (e) {
+                console.error(e);
+                alert("Erreur : " + e.message);
+            }
         }
 
         function resetBooking() {
