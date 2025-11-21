@@ -574,9 +574,12 @@
                 <button type="submit" class="btn btn-primary">
                     Se connecter
                 </button>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#" id="link-forgot-password" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9em;">Mot de passe oublié ?</a>
+                </div>
             </form>
             <p style="margin-top: 30px; text-align: center; color: var(--text-secondary); font-size: 0.9em;">
-                Par defaut: admin / admin123
+                Par defaut: salon_elegance / salon2025
             </p>
         </div>
     </div>
@@ -589,6 +592,9 @@
             </div>
             <div class="user-info">
                 <span id="admin-username"></span>
+                <button class="btn btn-secondary" id="btn-change-password">
+                    Modifier mot de passe
+                </button>
                 <button class="btn btn-secondary" id="btn-logout">
                     Déconnexion
                 </button>
@@ -674,16 +680,68 @@
         </div>
     </div>
 
+    <div id="modal-change-password" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Modifier le mot de passe</h2>
+            </div>
+            <form id="change-password-form">
+                <div class="form-group">
+                    <label for="cp-old-password">Ancien mot de passe</label>
+                    <input type="password" id="cp-old-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="cp-new-password">Nouveau mot de passe</label>
+                    <input type="password" id="cp-new-password" required>
+                </div>
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" id="btn-close-cp-modal">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-reset-password" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Réinitialiser le mot de passe</h2>
+            </div>
+            <form id="reset-password-form">
+                <div class="form-group">
+                    <label for="rp-username">Nom d'utilisateur</label>
+                    <input type="text" id="rp-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="rp-recovery-key">Clé de récupération</label>
+                    <input type="password" id="rp-recovery-key" required placeholder="Clé admin">
+                </div>
+                <div class="form-group">
+                    <label for="rp-new-password">Nouveau mot de passe</label>
+                    <input type="password" id="rp-new-password" required>
+                </div>
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" id="btn-close-rp-modal">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        Réinitialiser
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         var SALONS_CONFIG = {
-            "elegance": {"name": "Salon Élégance"},
-            "studio": {"name": "Studio Coiffure"}
+            "elegance": {"name": "Salon Élégance"}
         };
 
-        var ADMIN_ACCOUNTS = [
-            {username: 'admin', password: 'admin123', name: 'Administrateur'},
-            {username: 'salon', password: 'salon2025', name: 'Gerant'}
-        ];
+        // ADMIN_ACCOUNTS removed - using API
 
         var urlParams = new URLSearchParams(window.location.search);
         var salonId = urlParams.get('salon') || 'elegance';
@@ -715,26 +773,123 @@
 
         document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 
-        document.getElementById('login-form').addEventListener('submit', function(e) {
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             var username = document.getElementById('username').value;
             var password = document.getElementById('password').value;
 
-            var account = null;
-            for (var i = 0; i < ADMIN_ACCOUNTS.length; i++) {
-                if (ADMIN_ACCOUNTS[i].username === username && ADMIN_ACCOUNTS[i].password === password) {
-                    account = ADMIN_ACCOUNTS[i];
-                    break;
-                }
-            }
+            try {
+                const response = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'login',
+                        username: username,
+                        password: password,
+                        salon_id: salonId
+                    })
+                });
 
-            if (account) {
-                sessionStorage.setItem('admin_logged_in', 'true');
-                sessionStorage.setItem('admin_name', account.name);
-                showAdminDashboard();
-            } else {
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    sessionStorage.setItem('admin_logged_in', 'true');
+                    sessionStorage.setItem('admin_name', username);
+                    showAdminDashboard();
+                } else {
+                    document.getElementById('login-error').style.display = 'block';
+                    document.getElementById('login-error').textContent = '❌ ' + (data.error || 'Identifiants incorrects');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
                 document.getElementById('login-error').style.display = 'block';
-                document.getElementById('login-error').textContent = '❌ Identifiants incorrects';
+                document.getElementById('login-error').textContent = '❌ Erreur de connexion';
+            }
+        });
+
+        // Password Management
+        document.getElementById('btn-change-password').addEventListener('click', function() {
+            document.getElementById('modal-change-password').classList.add('active');
+        });
+
+        document.getElementById('btn-close-cp-modal').addEventListener('click', function() {
+            document.getElementById('modal-change-password').classList.remove('active');
+            document.getElementById('change-password-form').reset();
+        });
+
+        document.getElementById('change-password-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var oldPassword = document.getElementById('cp-old-password').value;
+            var newPassword = document.getElementById('cp-new-password').value;
+            var username = sessionStorage.getItem('admin_name');
+
+            try {
+                const response = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'change_password',
+                        username: username,
+                        old_password: oldPassword,
+                        new_password: newPassword
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    alert('Mot de passe modifié avec succès');
+                    document.getElementById('modal-change-password').classList.remove('active');
+                    document.getElementById('change-password-form').reset();
+                } else {
+                    alert('Erreur: ' + (data.error || 'Impossible de modifier le mot de passe'));
+                }
+            } catch (error) {
+                console.error('Change password error:', error);
+                alert('Erreur lors de la modification du mot de passe');
+            }
+        });
+
+        document.getElementById('link-forgot-password').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('modal-reset-password').classList.add('active');
+        });
+
+        document.getElementById('btn-close-rp-modal').addEventListener('click', function() {
+            document.getElementById('modal-reset-password').classList.remove('active');
+            document.getElementById('reset-password-form').reset();
+        });
+
+        document.getElementById('reset-password-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var username = document.getElementById('rp-username').value;
+            var recoveryKey = document.getElementById('rp-recovery-key').value;
+            var newPassword = document.getElementById('rp-new-password').value;
+
+            try {
+                const response = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'reset_password',
+                        username: username,
+                        recovery_key: recoveryKey,
+                        new_password: newPassword
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    alert('Mot de passe réinitialisé avec succès. Vous pouvez vous connecter.');
+                    document.getElementById('modal-reset-password').classList.remove('active');
+                    document.getElementById('reset-password-form').reset();
+                } else {
+                    alert('Erreur: ' + (data.error || 'Impossible de réinitialiser le mot de passe'));
+                }
+            } catch (error) {
+                console.error('Reset password error:', error);
+                alert('Erreur lors de la réinitialisation du mot de passe');
             }
         });
 

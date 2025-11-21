@@ -41,6 +41,7 @@ app.all('/api/attach-payment-method', wrapVercelFunction(require('./api/api-atta
 app.all('/api/cancel-subscription', wrapVercelFunction(require('./api/api-cancel-subscription')));
 app.all('/api/bookings/coiffeurs', wrapVercelFunction(require('./api/api-coiffeurs')));
 app.all('/api/bookings', wrapVercelFunction(require('./api/api-bookings')));
+app.all('/api/auth', wrapVercelFunction(require('./api/api-auth')));
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
