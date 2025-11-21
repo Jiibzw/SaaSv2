@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+
+import os
+
+html_content = """<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -596,26 +599,29 @@
         </div>
     </div>
 
-    
-    
     <script>
         var SALON_ID = 'moderne';
-        var coiffeurs = [];
+        
+        function getCoiffeurs() {
+            var storageKey = 'salon_' + SALON_ID + '_coiffeurs';
+            var stored = localStorage.getItem(storageKey);
+            if (!stored) {
+                var defaultCoiffeurs = [
+                    {id: 1, prenom: 'Thomas', nom: 'Leroy', specialite: 'Coupe Design', actif: true},
+                    {id: 2, prenom: 'Sarah', nom: 'Bernard', specialite: 'Coloration', actif: true},
+                    {id: 3, prenom: 'Julie', nom: 'Moreau', specialite: 'Extensions', actif: true}
+                ];
+                localStorage.setItem(storageKey, JSON.stringify(defaultCoiffeurs));
+                return defaultCoiffeurs;
+            }
+            return JSON.parse(stored);
+        }
+
+        var coiffeurs = getCoiffeurs();
         var selectedCoiffeur = null;
         var selectedDate = null;
         var selectedTime = null;
         var formSubmitting = false;
-
-        async function getCoiffeurs() {
-            try {
-                const response = await fetch('/api/api-coiffeurs?salon_id=' + SALON_ID);
-                if (!response.ok) throw new Error('Erreur chargement coiffeurs');
-                return await response.json();
-            } catch (e) {
-                console.error(e);
-                return [];
-            }
-        }
 
         function scrollToBooking() {
             document.getElementById('booking-section').scrollIntoView({behavior: 'smooth'});
@@ -640,26 +646,20 @@
             if (step === 3) loadTimeSlots();
         }
 
-        async function renderCoiffeurs() {
+        function renderCoiffeurs() {
             var container = document.getElementById('coiffeurs-list');
-            container.innerHTML = '<p style="text-align:center; width:100%; color:var(--gray);">Chargement des experts...</p>';
-
-            coiffeurs = await getCoiffeurs();
             container.innerHTML = '';
 
-            var activeCoiffeurs = coiffeurs.filter(function(c) { return c.actif; });
+            coiffeurs = getCoiffeurs();
 
-            if (activeCoiffeurs.length === 0) {
-                container.innerHTML = '<p style="text-align:center; width:100%; color:var(--gray);">Aucun expert disponible pour le moment.</p>';
-                return;
-            }
+            for (var i = 0; i < coiffeurs.length; i++) {
+                var coiffeur = coiffeurs[i];
+                if (coiffeur.actif === false) continue;
 
-            for (var i = 0; i < activeCoiffeurs.length; i++) {
-                var coiffeur = activeCoiffeurs[i];
                 var card = document.createElement('div');
                 card.className = 'coiffeur-card';
                 card.setAttribute('data-id', coiffeur.id);
-                card.innerHTML = '<div style="font-size:2rem; margin-bottom:0.5rem"><i class="fa-solid fa-user"></i></div>' +
+                card.innerHTML = '<div style="font-size:2rem; margin-bottom:0.5rem"><i class="fa-solid fa-user-tie"></i></div>' +
                                 '<h3 style="font-size:1.1rem; margin-bottom:0.25rem">' + coiffeur.prenom + ' ' + coiffeur.nom + '</h3>' +
                                 '<p style="font-size:0.9rem; color:var(--gray)">' + coiffeur.specialite + '</p>';
                 card.onclick = function() {
@@ -685,7 +685,7 @@
             var today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            for (var i = 0; i < 7; i++) {
+            for (var i = 0; i < 14; i++) {
                 var date = new Date(today);
                 date.setDate(today.getDate() + i);
 
@@ -704,9 +704,13 @@
                 day.innerHTML = '<div style="font-size:0.8rem; text-transform:uppercase; margin-bottom:0.25rem">' + dayNames[date.getDay()] + '</div>' +
                                '<div style="font-size: 1.2rem; font-weight: bold;">' + date.getDate() + '</div>';
 
-                day.onclick = function() {
-                    if (!this.classList.contains('disabled')) selectDate(this);
-                };
+                if (date.getDay() === 0) {
+                     day.classList.add('disabled');
+                } else {
+                    day.onclick = function() {
+                        if (!this.classList.contains('disabled')) selectDate(this);
+                    };
+                }
                 container.appendChild(day);
             }
         }
@@ -826,7 +830,7 @@
             });
 
             try {
-                const response = await fetch('/api/api-bookings', {
+                const response = await fetch('/api/bookings', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -904,4 +908,7 @@
         };
     </script>
 </body>
-</html>
+</html>"""
+
+with open('/home/heddy/timetobook/moderne/index.html', 'w') as f:
+    f.write(html_content)

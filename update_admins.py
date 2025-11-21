@@ -1,18 +1,28 @@
-<!DOCTYPE html>
+import os
+
+salons = [
+    {"id": "beaute", "name": "Institut Beauté", "color": "#2a9d8f", "icon": "fa-spa"},
+    {"id": "chic", "name": "Salon Chic", "color": "#c9184a", "icon": "fa-gem"},
+    {"id": "elegance", "name": "Salon Élégance", "color": "#667eea", "icon": "fa-wand-magic-sparkles"},
+    {"id": "moderne", "name": "Salon Moderne", "color": "#f77f00", "icon": "fa-scissors"},
+    {"id": "studio", "name": "Studio Coiffure", "color": "#e63946", "icon": "fa-user-astronaut"}
+]
+
+part1 = """<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Studio Coiffure</title>
+    <title>Admin - {SALON_NAME}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #e63946;
-            --primary-light: #e6394615;
-            --primary-hover: #e63946dd;
+            --primary: {SALON_COLOR};
+            --primary-light: {SALON_COLOR}15;
+            --primary-hover: {SALON_COLOR}dd;
             --bg: #f8fafc;
             --surface: #ffffff;
             --text-main: #0f172a;
@@ -119,15 +129,17 @@
     </style>
 </head>
 <body>
+"""
 
+part2 = """
     <div id="login-screen" class="login-wrapper">
         <div class="login-card">
-            <div class="login-logo"><i class="fa-solid fa-user-astronaut"></i></div>
+            <div class="login-logo"><i class="fa-solid {SALON_ICON}"></i></div>
             <h1 style="margin-bottom: 0.5rem; font-size: 1.75rem; font-weight: 700;">Espace Admin</h1>
-            <p style="color: var(--text-muted); margin-bottom: 2.5rem;">Studio Coiffure</p>
+            <p style="color: var(--text-muted); margin-bottom: 2.5rem;">{SALON_NAME}</p>
             <div id="login-error" style="background: #fef2f2; color: #b91c1c; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; display: none; font-size: 0.9rem; border: 1px solid #fee2e2;"></div>
             <form id="login-form">
-                <div class="form-group"><label>Identifiant</label><input type="text" id="username" required placeholder="studio"></div>
+                <div class="form-group"><label>Identifiant</label><input type="text" id="username" required placeholder="{SALON_ID}"></div>
                 <div class="form-group"><label>Mot de passe</label><input type="password" id="password" required placeholder="••••••••"></div>
                 <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 1rem;">Se connecter</button>
             </form>
@@ -136,7 +148,7 @@
 
     <div id="admin-container" class="dashboard-container">
         <aside class="sidebar" id="sidebar">
-            <a href="#" class="brand"><i class="fa-solid fa-user-astronaut"></i> Studio Coiffure</a>
+            <a href="#" class="brand"><i class="fa-solid {SALON_ICON}"></i> {SALON_NAME}</a>
             <nav class="nav-menu">
                 <div class="nav-item active" onclick="switchTab('dashboard')"><i class="fa-solid fa-chart-pie"></i> Tableau de bord</div>
                 <div class="nav-item" onclick="switchTab('bookings')"><i class="fa-regular fa-calendar"></i> Rendez-vous</div>
@@ -228,9 +240,11 @@
             </form>
         </div>
     </div>
+"""
 
+part3 = """
     <script>
-        const SALON_ID = 'studio';
+        const SALON_ID = '{SALON_ID}';
         let currentRdvs = [];
         let currentStaff = [];
         let currentFilter = 'all';
@@ -439,3 +453,15 @@
     </script>
 </body>
 </html>
+"""
+
+for salon in salons:
+    full_content = (part1 + part2 + part3).replace("{SALON_NAME}", salon["name"]) \
+                      .replace("{SALON_COLOR}", salon["color"]) \
+                      .replace("{SALON_ID}", salon["id"]) \
+                      .replace("{SALON_ICON}", salon["icon"])
+    
+    file_path = f"{salon['id']}/admin.html"
+    with open(file_path, "w") as f:
+        f.write(full_content)
+    print(f"Updated {file_path}")

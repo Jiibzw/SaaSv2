@@ -39,9 +39,11 @@ app.all('/api/create-checkout-session', wrapVercelFunction(require('./api/api-cr
 app.all('/api/webhook', wrapVercelFunction(require('./api/api-webhook')));
 app.all('/api/attach-payment-method', wrapVercelFunction(require('./api/api-attach-payment-method')));
 app.all('/api/cancel-subscription', wrapVercelFunction(require('./api/api-cancel-subscription')));
-app.all('/api/bookings/coiffeurs', wrapVercelFunction(require('./api/api-coiffeurs')));
-app.all('/api/bookings', wrapVercelFunction(require('./api/api-bookings')));
-app.all('/api/auth', wrapVercelFunction(require('./api/api-auth')));
+
+// Standardized Vercel routes (filename = route)
+app.all('/api/api-coiffeurs', wrapVercelFunction(require('./api/api-coiffeurs')));
+app.all('/api/api-bookings', wrapVercelFunction(require('./api/api-bookings')));
+app.all('/api/api-auth', wrapVercelFunction(require('./api/api-auth')));
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

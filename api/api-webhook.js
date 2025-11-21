@@ -1,5 +1,6 @@
 // api/webhook.js
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const db = require('../lib/db');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -23,6 +24,21 @@ module.exports = async (req, res) => {
 
   try {
     switch (event.type) {
+      case 'checkout.session.completed':
+        const session = event.data.object;
+        const username = session.metadata.username;
+        const customerId = session.customer;
+        const subscriptionId = session.subscription;
+
+        if (username) {
+            await db.query(
+                'UPDATE users SET stripe_customer_id = $1, stripe_subscription_id = $2 WHERE username = $3',
+                [customerId, subscriptionId, username]
+            );
+            console.log(`Subscription linked to user ${username}`);
+        }
+        break;
+
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
         console.log('Activation salon:', event.data.object);

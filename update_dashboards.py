@@ -1,18 +1,28 @@
-<!DOCTYPE html>
+import os
+
+salons = [
+    {"id": "beaute", "name": "Institut Beauté", "color": "#2a9d8f", "icon": "fa-spa"},
+    {"id": "chic", "name": "Salon Chic", "color": "#c9184a", "icon": "fa-gem"},
+    {"id": "elegance", "name": "Salon Élégance", "color": "#667eea", "icon": "fa-wand-magic-sparkles"},
+    {"id": "moderne", "name": "Salon Moderne", "color": "#f77f00", "icon": "fa-scissors"},
+    {"id": "studio", "name": "Studio Coiffure", "color": "#e63946", "icon": "fa-user-astronaut"}
+]
+
+template = r"""<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Salon Moderne</title>
+    <title>Dashboard - {SALON_NAME}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #f77f00;
-            --primary-light: #f77f0015;
-            --primary-hover: #f77f00dd;
+            --primary: {SALON_COLOR};
+            --primary-light: {SALON_COLOR}15;
+            --primary-hover: {SALON_COLOR}dd;
             --bg: #f8fafc;
             --surface: #ffffff;
             --text-main: #0f172a;
@@ -147,7 +157,7 @@
             <div class="user-profile">
                 <div class="avatar">{SALON_ID[0].toUpperCase()}</div>
                 <div class="user-info">
-                    <div class="user-name">Salon Moderne</div>
+                    <div class="user-name">{SALON_NAME}</div>
                     <div class="user-role">Propriétaire</div>
                 </div>
                 <a href="../" class="btn-logout" title="Déconnexion"><i class="fa-solid fa-right-from-bracket"></i></a>
@@ -414,3 +424,15 @@
     </script>
 </body>
 </html>
+"""
+
+for salon in salons:
+    full_content = template.replace("{SALON_NAME}", salon["name"]) \
+                      .replace("{SALON_COLOR}", salon["color"]) \
+                      .replace("{SALON_ID}", salon["id"]) \
+                      .replace("{SALON_ICON}", salon["icon"])
+    
+    file_path = f"{salon['id']}/dashboard-{salon['id']}.html"
+    with open(file_path, "w") as f:
+        f.write(full_content)
+    print(f"Updated {file_path}")

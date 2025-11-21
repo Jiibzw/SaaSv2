@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+
+html_content = """<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salon Moderne - Réservation en ligne</title>
+    <title>Studio Coiffure - Réservation en ligne</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,10 +16,10 @@
 
     <style>
         :root {
-            --primary: #f77f00;
-            --primary-dark: #d96d00;
-            --secondary: #003049;
-            --light: #fff7ed;
+            --primary: #e63946;
+            --primary-dark: #b91c1c;
+            --secondary: #b91c1c;
+            --light: #fef2f2;
             --text: #1f2937;
             --gray: #6b7280;
             --white: #ffffff;
@@ -70,7 +71,7 @@
 
         /* Hero */
         .hero {
-            background: linear-gradient(rgba(0, 48, 73, 0.8), rgba(247, 127, 0, 0.8)), url('https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background: linear-gradient(rgba(185, 28, 28, 0.8), rgba(230, 57, 70, 0.8)), url('https://images.unsplash.com/photo-1562322140-8baeececf3df?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
             background-size: cover;
             background-position: center;
             color: white;
@@ -347,7 +348,7 @@
         .form-group input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(247, 127, 0, 0.1);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
         }
 
         .form-group input.error { border-color: #ef4444; }
@@ -443,7 +444,7 @@
             <i class="fa-solid fa-arrow-left"></i> Retour
         </a>
         <div class="logo">
-            <i class="fa-solid fa-scissors"></i> Salon Moderne
+            <i class="fa-solid fa-scissors"></i> Studio Coiffure
         </div>
         <a href="admin.html" class="nav-btn">
             <i class="fa-solid fa-lock"></i> Admin
@@ -451,11 +452,11 @@
     </nav>
 
     <header class="hero">
-        <h1>Salon Moderne</h1>
-        <p>Spécialiste des techniques innovantes pour une coiffure à la pointe de la mode.</p>
+        <h1>Studio Coiffure</h1>
+        <p>Le salon tendance sur les Champs-Élysées pour un look unique.</p>
         <div class="hero-info">
-            <span><i class="fa-solid fa-location-dot"></i> 22 Boulevard Haussmann, Paris 9ème</span>
-            <span><i class="fa-solid fa-phone"></i> 01 88 99 00 11</span>
+            <span><i class="fa-solid fa-location-dot"></i> 45 Avenue des Champs-Élysées, Paris 8ème</span>
+            <span><i class="fa-solid fa-phone"></i> 01 55 22 33 44</span>
         </div>
     </header>
 
@@ -464,21 +465,21 @@
         <div class="services-grid">
             <div class="service-card">
                 <div class="service-icon"><i class="fa-solid fa-scissors"></i></div>
-                <h3>Coupe Design</h3>
-                <p>Coupe structurée et moderne</p>
-                <div class="service-price">55€</div>
+                <h3>Coupe & Style</h3>
+                <p>Transformation complète</p>
+                <div class="service-price">50€</div>
             </div>
             <div class="service-card">
-                <div class="service-icon"><i class="fa-solid fa-rainbow"></i></div>
-                <h3>Coloration Fantaisie</h3>
-                <p>Couleurs vives et pastels</p>
-                <div class="service-price">80€</div>
+                <div class="service-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <h3>Balayage</h3>
+                <p>Lumière et relief</p>
+                <div class="service-price">90€</div>
             </div>
             <div class="service-card">
-                <div class="service-icon"><i class="fa-solid fa-user-hair-long"></i></div>
-                <h3>Extensions</h3>
-                <p>Longueur et volume</p>
-                <div class="service-price">120€</div>
+                <div class="service-icon"><i class="fa-solid fa-user"></i></div>
+                <h3>Barbe</h3>
+                <p>Taille et soin barbe</p>
+                <div class="service-price">25€</div>
             </div>
         </div>
 
@@ -577,7 +578,7 @@
     </div>
 
     <footer class="footer">
-        <p>© 2025 Salon Moderne - TimeToBook Solutions</p>
+        <p>© 2025 Studio Coiffure - TimeToBook Solutions</p>
     </footer>
 
     <div id="modal-confirmation" class="modal">
@@ -596,26 +597,29 @@
         </div>
     </div>
 
-    
-    
     <script>
-        var SALON_ID = 'moderne';
-        var coiffeurs = [];
+        var SALON_ID = 'studio';
+        
+        function getCoiffeurs() {
+            var storageKey = 'salon_' + SALON_ID + '_coiffeurs';
+            var stored = localStorage.getItem(storageKey);
+            if (!stored) {
+                var defaultCoiffeurs = [
+                    {id: 1, prenom: 'Sophie', nom: 'Martin', specialite: 'Coupe & Coloration', actif: true},
+                    {id: 2, prenom: 'Lucas', nom: 'Dubois', specialite: 'Coupe homme & Barbe', actif: true},
+                    {id: 3, prenom: 'Emma', nom: 'Rousseau', specialite: 'Coiffure de mariage', actif: true}
+                ];
+                localStorage.setItem(storageKey, JSON.stringify(defaultCoiffeurs));
+                return defaultCoiffeurs;
+            }
+            return JSON.parse(stored);
+        }
+
+        var coiffeurs = getCoiffeurs();
         var selectedCoiffeur = null;
         var selectedDate = null;
         var selectedTime = null;
         var formSubmitting = false;
-
-        async function getCoiffeurs() {
-            try {
-                const response = await fetch('/api/api-coiffeurs?salon_id=' + SALON_ID);
-                if (!response.ok) throw new Error('Erreur chargement coiffeurs');
-                return await response.json();
-            } catch (e) {
-                console.error(e);
-                return [];
-            }
-        }
 
         function scrollToBooking() {
             document.getElementById('booking-section').scrollIntoView({behavior: 'smooth'});
@@ -640,26 +644,20 @@
             if (step === 3) loadTimeSlots();
         }
 
-        async function renderCoiffeurs() {
+        function renderCoiffeurs() {
             var container = document.getElementById('coiffeurs-list');
-            container.innerHTML = '<p style="text-align:center; width:100%; color:var(--gray);">Chargement des experts...</p>';
-
-            coiffeurs = await getCoiffeurs();
             container.innerHTML = '';
 
-            var activeCoiffeurs = coiffeurs.filter(function(c) { return c.actif; });
+            coiffeurs = getCoiffeurs();
 
-            if (activeCoiffeurs.length === 0) {
-                container.innerHTML = '<p style="text-align:center; width:100%; color:var(--gray);">Aucun expert disponible pour le moment.</p>';
-                return;
-            }
+            for (var i = 0; i < coiffeurs.length; i++) {
+                var coiffeur = coiffeurs[i];
+                if (coiffeur.actif === false) continue;
 
-            for (var i = 0; i < activeCoiffeurs.length; i++) {
-                var coiffeur = activeCoiffeurs[i];
                 var card = document.createElement('div');
                 card.className = 'coiffeur-card';
                 card.setAttribute('data-id', coiffeur.id);
-                card.innerHTML = '<div style="font-size:2rem; margin-bottom:0.5rem"><i class="fa-solid fa-user"></i></div>' +
+                card.innerHTML = '<div style="font-size:2rem; margin-bottom:0.5rem"><i class="fa-solid fa-user-tie"></i></div>' +
                                 '<h3 style="font-size:1.1rem; margin-bottom:0.25rem">' + coiffeur.prenom + ' ' + coiffeur.nom + '</h3>' +
                                 '<p style="font-size:0.9rem; color:var(--gray)">' + coiffeur.specialite + '</p>';
                 card.onclick = function() {
@@ -685,7 +683,7 @@
             var today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            for (var i = 0; i < 7; i++) {
+            for (var i = 0; i < 14; i++) {
                 var date = new Date(today);
                 date.setDate(today.getDate() + i);
 
@@ -704,9 +702,13 @@
                 day.innerHTML = '<div style="font-size:0.8rem; text-transform:uppercase; margin-bottom:0.25rem">' + dayNames[date.getDay()] + '</div>' +
                                '<div style="font-size: 1.2rem; font-weight: bold;">' + date.getDate() + '</div>';
 
-                day.onclick = function() {
-                    if (!this.classList.contains('disabled')) selectDate(this);
-                };
+                if (date.getDay() === 0) {
+                     day.classList.add('disabled');
+                } else {
+                    day.onclick = function() {
+                        if (!this.classList.contains('disabled')) selectDate(this);
+                    };
+                }
                 container.appendChild(day);
             }
         }
@@ -826,7 +828,7 @@
             });
 
             try {
-                const response = await fetch('/api/api-bookings', {
+                const response = await fetch('/api/bookings', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -904,4 +906,7 @@
         };
     </script>
 </body>
-</html>
+</html>"""
+
+with open('studio/index.html', 'w') as f:
+    f.write(html_content)

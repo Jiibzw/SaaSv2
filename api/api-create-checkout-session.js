@@ -17,19 +17,20 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { plan, email, salonName } = req.body;
+    const { plan, email, salonName, username } = req.body;
 
-    if (!plan || !email || !salonName) {
+    if (!plan || !email || !salonName || !username) {
       res.status(400).json({ 
         error: 'Paramètres manquants',
-        required: ['plan', 'email', 'salonName']
+        required: ['plan', 'email', 'salonName', 'username']
       });
       return;
     }
 
     const prices = {
       starter: process.env.STRIPE_PRICE_STARTER,
-      pro: process.env.STRIPE_PRICE_PRO
+      pro: process.env.STRIPE_PRICE_PRO,
+      premium: process.env.STRIPE_PRICE_PREMIUM // Added premium
     };
 
     if (!prices[plan]) {
@@ -49,13 +50,15 @@ module.exports = async (req, res) => {
       customer_email: email,
       metadata: {
         salonName: salonName,
-        plan: plan
+        plan: plan,
+        username: username // Pass username to link later
       },
       subscription_data: {
         trial_period_days: 14,
         metadata: {
           salonName: salonName,
-          plan: plan
+          plan: plan,
+          username: username
         }
       }
     });

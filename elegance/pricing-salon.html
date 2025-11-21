@@ -3,415 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nos Plans - TimeToBook</title>
+    <title>Offres & Tarifs - Salon Élégance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary: #667eea;
+            --primary-light: #667eea15;
+            --primary-hover: #667eeadd;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 16px;
+            --sidebar-width: 280px;
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: var(--text-main); -webkit-font-smoothing: antialiased; }
+        
+        /* Layout */
+        .dashboard-container { display: flex; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar { width: var(--sidebar-width); background: var(--surface); border-right: 1px solid var(--border); position: fixed; top: 0; bottom: 0; left: 0; z-index: 50; padding: 2rem 1.5rem; display: flex; flex-direction: column; transition: transform 0.3s ease; }
+        .brand { display: flex; align-items: center; gap: 1rem; font-size: 1.25rem; font-weight: 700; color: var(--text-main); text-decoration: none; margin-bottom: 3rem; padding: 0 0.5rem; }
+        .brand i { color: var(--primary); }
+        .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+        .nav-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; color: var(--text-muted); text-decoration: none; border-radius: var(--radius); font-weight: 500; transition: all 0.2s; cursor: pointer; }
+        .nav-item:hover { background: var(--bg); color: var(--text-main); }
+        .nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+        .nav-item i { width: 20px; text-align: center; }
+        
+        .user-profile { margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; }
+        .avatar { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .user-info { flex: 1; overflow: hidden; }
+        .user-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-role { font-size: 0.8rem; color: var(--text-muted); }
+        .btn-logout { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0.5rem; border-radius: 8px; transition: all 0.2s; }
+        .btn-logout:hover { background: #fee2e2; color: #ef4444; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f8f9fa;
-            min-height: 100vh;
-        }
+        /* Main Content */
+        .main-content { flex: 1; margin-left: var(--sidebar-width); padding: 2rem; width: calc(100% - var(--sidebar-width)); }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
+        .page-title { font-size: 1.75rem; font-weight: 700; color: var(--text-main); }
+        .date-display { color: var(--text-muted); font-weight: 500; }
+        
+        /* Pricing Grid */
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 4rem; }
+        .pricing-card { background: var(--surface); border-radius: 24px; padding: 2rem; border: 1px solid var(--border); position: relative; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
+        .pricing-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+        .pricing-card.featured { border: 2px solid var(--primary); box-shadow: 0 10px 30px -10px var(--primary-light); }
+        .pricing-card.premium { background: linear-gradient(145deg, #1e293b, #0f172a); color: white; border: none; }
+        
+        .plan-badge { position: absolute; top: 1.5rem; right: 1.5rem; padding: 0.35rem 0.85rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        .badge-current { background: #dcfce7; color: #166534; }
+        .badge-popular { background: var(--primary-light); color: var(--primary); }
+        .badge-new { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
 
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px 0;
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
-        }
+        .plan-name { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .plan-price { font-size: 2.5rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: baseline; gap: 0.25rem; }
+        .plan-price span { font-size: 1rem; font-weight: 500; color: var(--text-muted); }
+        .pricing-card.premium .plan-price span { color: #94a3b8; }
+        
+        .features-list { list-style: none; margin-bottom: 2rem; flex: 1; }
+        .features-list li { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; font-size: 0.95rem; }
+        .features-list li i { color: var(--primary); }
+        .pricing-card.premium .features-list li i { color: #4ade80; }
+        
+        .btn-plan { width: 100%; padding: 1rem; border-radius: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; font-size: 1rem; }
+        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { border-color: var(--text-main); background: var(--text-main); color: white; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-white { background: white; color: #0f172a; }
+        .btn-white:hover { background: #f1f5f9; }
+        .btn-disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
 
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 2em;
-            font-weight: bold;
-            color: white;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            opacity: 0.95;
-        }
-
-        .nav-links a:hover {
-            opacity: 1;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 60px auto;
-            padding: 0 40px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-
-        .header h1 {
-            font-size: 3em;
-            color: #343a40;
-            margin-bottom: 15px;
-        }
-
-        .header p {
-            font-size: 1.2em;
-            color: #6c757d;
-        }
-
-        .current-plan-notice {
-            background: #d4edda;
-            border-left: 4px solid #28a745;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 40px;
-            text-align: center;
-        }
-
-        .current-plan-notice strong {
-            color: #155724;
-            font-size: 1.1em;
-        }
-
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 40px;
-            margin: 60px 0;
-        }
-
-        .pricing-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            transition: all 0.4s ease;
-            position: relative;
-            border: 2px solid #e9ecef;
-        }
-
-        .pricing-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.2);
-            border-color: #667eea;
-        }
-
-        .pricing-card.current {
-            border: 3px solid #28a745;
-            background: #f0fff4;
-        }
-
-        .pricing-card.featured {
-            border: 3px solid #667eea;
-            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.3);
-        }
-
-        .badge {
-            position: absolute;
-            top: -15px;
-            right: 30px;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            color: white;
-        }
-
-        .badge.current-badge {
-            background: #28a745;
-        }
-
-        .badge.popular-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .plan-name {
-            font-size: 1.8em;
-            color: #343a40;
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
-
-        .price {
-            font-size: 3.5em;
-            color: #667eea;
-            font-weight: 700;
-            margin: 20px 0;
-        }
-
-        .price span {
-            font-size: 0.4em;
-            color: #6c757d;
-            font-weight: 400;
-        }
-
-        .features-list {
-            list-style: none;
-            margin: 30px 0;
-        }
-
-        .features-list li {
-            padding: 15px 0;
-            color: #495057;
-            font-size: 1.05em;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .features-list li:last-child {
-            border-bottom: none;
-        }
-
-        .check-icon {
-            color: #28a745;
-            font-size: 1.3em;
-        }
-
-        .btn-subscribe {
-            display: block;
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 12px;
-            font-size: 1.1em;
-            font-weight: 600;
-            transition: all 0.3s;
-            margin-top: 30px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-subscribe:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-subscribe.current-plan {
-            background: #6c757d;
-            cursor: not-allowed;
-        }
-
-        .btn-subscribe.current-plan:hover {
-            transform: none;
-            box-shadow: none;
-        }
-
-        .comparison-table {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            margin-top: 80px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-
-        .comparison-table h2 {
-            color: #343a40;
-            margin-bottom: 30px;
-            text-align: center;
-            font-size: 2em;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 20px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        th {
-            background: #f8f9fa;
-            font-weight: 700;
-            color: #343a40;
-        }
-
-        .check {
-            color: #28a745;
-            font-size: 1.5em;
-        }
-
-        .cross {
-            color: #dc3545;
-            font-size: 1.5em;
-        }
-
-        @media (max-width: 768px) {
-            .pricing-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .price {
-                font-size: 2.5em;
-            }
+        /* Comparison Table */
+        .comparison-section { background: var(--surface); border-radius: 24px; padding: 2rem; border: 1px solid var(--border); overflow: hidden; }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 1.5rem; background: var(--bg); font-weight: 600; color: var(--text-muted); font-size: 0.9rem; }
+        td { padding: 1.5rem; border-bottom: 1px solid var(--border); color: var(--text-main); }
+        tr:last-child td { border-bottom: none; }
+        .check { color: #10b981; font-size: 1.1rem; }
+        .cross { color: #ef4444; font-size: 1.1rem; opacity: 0.5; }
+        
+        /* Mobile */
+        .mobile-toggle { display: none; font-size: 1.5rem; color: var(--text-main); cursor: pointer; background: none; border: none; }
+        
+        @media (max-width: 1024px) {
+            .sidebar { transform: translateX(-100%); box-shadow: 20px 0 40px rgba(0,0,0,0.1); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; width: 100%; padding: 1.5rem; }
+            .mobile-toggle { display: block; }
+            .top-bar { gap: 1rem; }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">⏰ TimeToBook</div>
-            <div class="nav-links">
-                <a href="./dashboard.html">← Retour au dashboard</a>
+
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <a href="#" class="brand"><i class="fa-solid fa-clock"></i> TimeToBook</a>
+            <nav class="nav-menu">
+                <a href="dashboard-elegance.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Vue d'ensemble</a>
+                <a href="admin.html" class="nav-item"><i class="fa-solid fa-store"></i> Gestion Salon</a>
+                <div class="nav-item active"><i class="fa-solid fa-tags"></i> Offres & Tarifs</div>
+            </nav>
+            <div class="user-profile">
+                <div class="avatar">{SALON_ID[0].toUpperCase()}</div>
+                <div class="user-info">
+                    <div class="user-name">Salon Élégance</div>
+                    <div class="user-role">Propriétaire</div>
+                </div>
+                <a href="../" class="btn-logout" title="Déconnexion"><i class="fa-solid fa-right-from-bracket"></i></a>
             </div>
-        </div>
-    </nav>
+        </aside>
 
-    <div class="container">
-        <div class="header">
-            <h1>💰 Nos Plans d'Abonnement</h1>
-            <p>Choisissez le plan qui correspond à vos besoins</p>
-        </div>
-
-        <div class="current-plan-notice">
-            <strong>✅ Vous êtes actuellement sur le plan Starter (39€/mois)</strong>
-        </div>
-
-        <div class="pricing-grid">
-            <!-- Plan Starter -->
-            <div class="pricing-card current">
-                <div class="badge current-badge">Votre plan actuel</div>
-                <div class="plan-name">🚀 Starter</div>
-                <div class="price">39€<span>/mois</span></div>
-
-                <ul class="features-list">
-                    <li><span class="check-icon">✓</span> 1 salon de coiffure</li>
-                    <li><span class="check-icon">✓</span> Coiffeurs illimités</li>
-                    <li><span class="check-icon">✓</span> Réservations illimitées</li>
-                    <li><span class="check-icon">✓</span> Notifications SMS</li>
-                    <li><span class="check-icon">✓</span> Statistiques de base</li>
-                    <li><span class="check-icon">✓</span> Support email</li>
-                </ul>
-
-                <button class="btn-subscribe current-plan" disabled>
-                    Plan actuel
-                </button>
+        <main class="main-content">
+            <div class="top-bar">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                    <div>
+                        <h1 class="page-title">Nos Offres</h1>
+                        <div class="date-display">Choisissez le plan adapté à votre croissance</div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Plan Pro -->
-            <div class="pricing-card featured">
-                <div class="badge popular-badge">✨ Recommandé</div>
-                <div class="plan-name">💼 Pro</div>
-                <div class="price">59€<span>/mois</span></div>
+            <div class="pricing-grid">
+                <!-- Starter -->
+                <div class="pricing-card">
+                    <div class="plan-badge badge-current">Actuel</div>
+                    <div class="plan-name">Starter</div>
+                    <div class="plan-price">39€<span>/mois</span></div>
+                    <ul class="features-list">
+                        <li><i class="fa-solid fa-check"></i> 1 Salon de coiffure</li>
+                        <li><i class="fa-solid fa-check"></i> Coiffeurs illimités</li>
+                        <li><i class="fa-solid fa-check"></i> Réservations illimitées</li>
+                        <li><i class="fa-solid fa-check"></i> Support Email</li>
+                    </ul>
+                    <button class="btn-plan btn-disabled" disabled>Plan Actuel</button>
+                </div>
 
-                <ul class="features-list">
-                    <li><span class="check-icon">✓</span> 2 salons de coiffure</li>
-                    <li><span class="check-icon">✓</span> Coiffeurs illimités</li>
-                    <li><span class="check-icon">✓</span> Réservations illimitées</li>
-                    <li><span class="check-icon">✓</span> Notifications SMS</li>
-                    <li><span class="check-icon">✓</span> Statistiques avancées</li>
-                    <li><span class="check-icon">✓</span> Support prioritaire</li>
-                    <li><span class="check-icon">✓</span> Personnalisation couleurs</li>
-                    <li><span class="check-icon">✓</span> Rapport mensuel détaillé</li>
-                </ul>
+                <!-- Pro -->
+                <div class="pricing-card featured">
+                    <div class="plan-badge badge-popular">Populaire</div>
+                    <div class="plan-name">Pro</div>
+                    <div class="plan-price">59€<span>/mois</span></div>
+                    <ul class="features-list">
+                        <li><i class="fa-solid fa-check"></i> 2 Salons de coiffure</li>
+                        <li><i class="fa-solid fa-check"></i> Tout du plan Starter</li>
+                        <li><i class="fa-solid fa-check"></i> Statistiques Avancées</li>
+                        <li><i class="fa-solid fa-check"></i> Support Prioritaire</li>
+                        <li><i class="fa-solid fa-check"></i> Personnalisation couleurs</li>
+                    </ul>
+                    <button class="btn-plan btn-primary" onclick="alert('Contactez-nous pour passer au plan Pro !')">Passer au Pro</button>
+                </div>
 
-                <button class="btn-subscribe" onclick="alert('Contactez-nous à contact@timetobook.fr pour passer au plan Pro')">
-                    ⬆️ Passer au Pro
-                </button>
+                <!-- Premium -->
+                <div class="pricing-card premium">
+                    <div class="plan-badge badge-new">Nouveau</div>
+                    <div class="plan-name">Premium</div>
+                    <div class="plan-price">75€<span>/mois</span></div>
+                    <ul class="features-list">
+                        <li><i class="fa-solid fa-check"></i> 3 Salons ou +</li>
+                        <li><i class="fa-solid fa-check"></i> Tout du plan Pro</li>
+                        <li><i class="fa-solid fa-check"></i> API Access</li>
+                        <li><i class="fa-solid fa-check"></i> Support VIP 24/7</li>
+                        <li><i class="fa-solid fa-check"></i> Account Manager dédié</li>
+                    </ul>
+                    <button class="btn-plan btn-white" onclick="alert('Contactez-nous pour l\'offre Premium !')">Contacter les ventes</button>
+                </div>
             </div>
-        </div>
 
-        <!-- Tableau comparatif -->
-        <div class="comparison-table">
-            <h2>📊 Comparaison Détaillée</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fonctionnalité</th>
-                        <th style="text-align: center;">Starter</th>
-                        <th style="text-align: center;">Pro</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Nombre de salons</strong></td>
-                        <td style="text-align: center;">1</td>
-                        <td style="text-align: center;">2</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Coiffeurs</strong></td>
-                        <td style="text-align: center;">Illimités</td>
-                        <td style="text-align: center;">Illimités</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Réservations</strong></td>
-                        <td style="text-align: center;">Illimitées</td>
-                        <td style="text-align: center;">Illimitées</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Notifications SMS</strong></td>
-                        <td style="text-align: center;"><span class="check">✓</span></td>
-                        <td style="text-align: center;"><span class="check">✓</span></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Statistiques de base</strong></td>
-                        <td style="text-align: center;"><span class="check">✓</span></td>
-                        <td style="text-align: center;"><span class="check">✓</span></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Statistiques avancées</strong></td>
-                        <td style="text-align: center;"><span class="cross">✗</span></td>
-                        <td style="text-align: center;"><span class="check">✓</span></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Support email</strong></td>
-                        <td style="text-align: center;"><span class="check">✓</span></td>
-                        <td style="text-align: center;"><span class="check">✓</span></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Support prioritaire</strong></td>
-                        <td style="text-align: center;"><span class="cross">✗</span></td>
-                        <td style="text-align: center;"><span class="check">✓</span></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Personnalisation couleurs</strong></td>
-                        <td style="text-align: center;"><span class="cross">✗</span></td>
-                        <td style="text-align: center;"><span class="check">✓</span></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Rapport mensuel détaillé</strong></td>
-                        <td style="text-align: center;"><span class="cross">✗</span></td>
-                        <td style="text-align: center;"><span class="check">✓</span></td>
-                    </tr>
-                    <tr style="background: #f8f9fa;">
-                        <td><strong>Prix mensuel</strong></td>
-                        <td style="text-align: center;"><strong>39€</strong></td>
-                        <td style="text-align: center;"><strong>59€</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+            <div class="comparison-section">
+                <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem;">Comparaison détaillée</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fonctionnalités</th>
+                                <th style="text-align: center;">Starter</th>
+                                <th style="text-align: center;">Pro</th>
+                                <th style="text-align: center;">Premium</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Nombre de salons</td>
+                                <td style="text-align: center;">1</td>
+                                <td style="text-align: center;">2</td>
+                                <td style="text-align: center;">3+</td>
+                            </tr>
+                            <tr>
+                                <td>Coiffeurs & Réservations</td>
+                                <td style="text-align: center;">Illimités</td>
+                                <td style="text-align: center;">Illimités</td>
+                                <td style="text-align: center;">Illimités</td>
+                            </tr>
+                            <tr>
+                                <td>Statistiques Avancées</td>
+                                <td style="text-align: center;"><i class="fa-solid fa-xmark cross"></i></td>
+                                <td style="text-align: center;"><i class="fa-solid fa-check check"></i></td>
+                                <td style="text-align: center;"><i class="fa-solid fa-check check"></i></td>
+                            </tr>
+                            <tr>
+                                <td>Personnalisation</td>
+                                <td style="text-align: center;"><i class="fa-solid fa-xmark cross"></i></td>
+                                <td style="text-align: center;"><i class="fa-solid fa-check check"></i></td>
+                                <td style="text-align: center;"><i class="fa-solid fa-check check"></i></td>
+                            </tr>
+                            <tr>
+                                <td>API Access</td>
+                                <td style="text-align: center;"><i class="fa-solid fa-xmark cross"></i></td>
+                                <td style="text-align: center;"><i class="fa-solid fa-xmark cross"></i></td>
+                                <td style="text-align: center;"><i class="fa-solid fa-check check"></i></td>
+                            </tr>
+                            <tr>
+                                <td>Support</td>
+                                <td style="text-align: center;">Email</td>
+                                <td style="text-align: center;">Prioritaire</td>
+                                <td style="text-align: center;"><strong>VIP 24/7</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-        <div style="text-align: center; margin: 60px 0; padding: 40px; background: white; border-radius: 20px;">
-            <h2 style="color: #343a40; margin-bottom: 20px;">❓ Des questions sur nos plans ?</h2>
-            <p style="color: #6c757d; margin-bottom: 30px; font-size: 1.1em;">
-                Notre équipe est là pour vous aider à choisir le meilleur plan
-            </p>
-            <a href="../contact.html" class="btn-subscribe" style="max-width: 300px; margin: 0 auto; display: block;">
-                📞 Contactez-nous
-            </a>
-        </div>
+        </main>
     </div>
+
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+    </script>
 </body>
 </html>
