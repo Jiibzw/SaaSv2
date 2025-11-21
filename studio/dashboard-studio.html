@@ -201,10 +201,10 @@
                 </div>
             </div>
 
-            <!-- Payment Methods -->
+            <!-- Payment Method -->
             <div class="content-card">
                 <div class="section-header">
-                    <div class="section-title"><i class="fa-solid fa-wallet" style="color: var(--primary);"></i> Moyens de paiement</div>
+                    <div class="section-title"><i class="fa-solid fa-wallet" style="color: var(--primary);"></i> Moyen de paiement</div>
                 </div>
                 
                 <div id="payment-card-container" class="payment-card" style="display: none;">
@@ -212,22 +212,20 @@
                         <div class="card-icon" id="card-brand-icon"><i class="fa-brands fa-cc-visa"></i></div>
                         <div class="card-text">
                             <strong id="card-last4">•••• •••• •••• 4242</strong>
-                            <span id="card-exp">Expire 12/2027</span>
+                            <span id="card-exp">Expire 12/24</span>
                         </div>
                     </div>
                     <div class="card-actions">
                         <button class="btn-card" onclick="openEditCardModal()">Modifier</button>
-                        <button class="btn-card" onclick="deleteCard()" style="background: rgba(220, 38, 38, 0.2); border-color: rgba(220, 38, 38, 0.3); color: #fca5a5;">Supprimer</button>
+                        <button class="btn-card" onclick="deleteCard()" style="background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.3); color: #fca5a5;"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>
 
-                <div id="no-payment-method" style="display: none; text-align: center; padding: 2rem; color: var(--text-muted);">
-                    Aucun moyen de paiement enregistré.
+                <div id="no-payment-method" style="display: none;">
+                    <button class="add-card-btn" onclick="openAddCardModal()">
+                        <i class="fa-solid fa-plus-circle"></i> Ajouter une méthode de paiement
+                    </button>
                 </div>
-
-                <button class="add-card-btn" onclick="openAddCardModal()">
-                    <i class="fa-solid fa-plus"></i> Ajouter une carte bancaire
-                </button>
             </div>
 
             <!-- Invoices -->
@@ -319,23 +317,61 @@
             }
         }
 
-        function cancelSubscription() {
-            if (confirm('⚠️ Êtes-vous sûr de vouloir résilier votre abonnement ?')) {
-                alert('✅ Résiliation confirmée. Votre accès reste actif jusqu\\'au 14 décembre 2025.');
+        async function cancelSubscription() {
+            if (!confirm('⚠️ Êtes-vous sûr de vouloir résilier votre abonnement ?')) return;
+
+            let username = null;
+            const userStr = localStorage.getItem('user');
+            const adminLoggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
+            
+            if (userStr) {
+                username = JSON.parse(userStr).username;
+            } else if (adminLoggedIn) {
+                username = sessionStorage.getItem('admin_name');
+            }
+
+            if (!username) return;
+
+            try {
+                const response = await fetch('/api/cancel-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const dateStr = new Date(data.endsAt).toLocaleDateString('fr-FR');
+                    alert(`✅ Résiliation confirmée. Votre accès reste actif jusqu'au ${dateStr}.`);
+                    window.location.reload();
+                } else {
+                    alert('Erreur: ' + (data.error || 'Impossible de résilier'));
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Une erreur est survenue.');
             }
         }
 
         // Fetch Subscription Data
         document.addEventListener('DOMContentLoaded', async () => {
+            let username = null;
             const userStr = localStorage.getItem('user');
-            if (!userStr) {
+            const adminLoggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
+            
+            if (userStr) {
+                username = JSON.parse(userStr).username;
+            } else if (adminLoggedIn) {
+                username = sessionStorage.getItem('admin_name');
+            }
+
+            if (!username) {
                 window.location.href = '../index.html';
                 return;
             }
-            const user = JSON.parse(userStr);
             
             try {
-                const response = await fetch(`/api/api-subscription-status?username=${user.username}`);
+                const response = await fetch(`/api/api-subscription-status?username=${username}`);
                 const data = await response.json();
 
                 if (data.error) {
@@ -343,11 +379,43 @@
                     return;
                 }
 
+                // BLOCK ACCESS IF CANCELED/EXPIRED
+                if (data.status === 'canceled' || data.status === 'unpaid' || data.status === 'expired') {
+                    document.body.innerHTML = `
+                        <div style="display:flex;justify-content:center;align-items:center;height:100vh;flex-direction:column;gap:1.5rem;text-align:center;font-family:'Space Grotesk',sans-serif;">
+                            <div style="font-size:3rem;color:#ef4444;"><i class="fa-solid fa-circle-xmark"></i></div>
+                            <h1 style="font-size:2rem;color:#000;font-weight:700;text-transform:uppercase;">Abonnement Expiré</h1>
+                            <p style="color:#666;max-width:400px;">Votre période d'abonnement est terminée. Veuillez renouveler votre offre pour accéder à nouveau à votre tableau de bord.</p>
+                            <a href="pricing-salon.html" style="background:#000;color:white;padding:1rem 2rem;border-radius:0;text-decoration:none;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Renouveler mon offre</a>
+                        </div>
+                    `;
+                    return;
+                }
+
                 // Update Status
                 const statusBadge = document.getElementById('subscription-status-badge');
-                statusBadge.textContent = data.status.toUpperCase();
+                let statusText = data.status.toUpperCase();
+                if (data.status === 'trialing') statusText = 'ESSAI GRATUIT';
+                
+                // Handle cancel_at_period_end
+                if (data.cancel_at_period_end) {
+                    statusText += ' (FIN PROCHE)';
+                }
+                
+                statusBadge.textContent = statusText;
+
                 if (data.status === 'active') {
                     statusBadge.className = 'badge badge-active';
+                    if (data.cancel_at_period_end) {
+                        statusBadge.style.backgroundColor = '#fff1f2';
+                        statusBadge.style.color = '#be123c';
+                        statusBadge.style.border = '1px solid #fda4af';
+                    }
+                } else if (data.status === 'trialing') {
+                    statusBadge.className = 'badge badge-active';
+                    statusBadge.style.backgroundColor = '#FEF3C7';
+                    statusBadge.style.color = '#D97706';
+                    statusBadge.style.border = '1px solid #FCD34D';
                 } else {
                     statusBadge.className = 'badge badge-inactive';
                 }

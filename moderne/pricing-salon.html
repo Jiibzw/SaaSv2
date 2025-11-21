@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Offres & Tarifs - Salon Moderne</title>
+    <script src="https://js.stripe.com/v3/"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -117,7 +118,7 @@
                 <div class="nav-item active"><i class="fa-solid fa-tags"></i> Offres & Tarifs</div>
             </nav>
             <div class="user-profile">
-                <div class="avatar">{SALON_ID[0].toUpperCase()}</div>
+                <div class="avatar">M</div>
                 <div class="user-info">
                     <div class="user-name">Salon Moderne</div>
                     <div class="user-role">Propriétaire</div>
@@ -139,8 +140,8 @@
 
             <div class="pricing-grid">
                 <!-- Starter -->
-                <div class="pricing-card">
-                    <div class="plan-badge badge-current">Actuel</div>
+                <div class="pricing-card" id="card-starter">
+                    <div class="plan-badge badge-current" style="display: none;">Actuel</div>
                     <div class="plan-name">Starter</div>
                     <div class="plan-price">39€<span>/mois</span></div>
                     <ul class="features-list">
@@ -149,14 +150,14 @@
                         <li><i class="fa-solid fa-check"></i> Réservations illimitées</li>
                         <li><i class="fa-solid fa-check"></i> Support Email</li>
                     </ul>
-                    <button class="btn-plan btn-disabled" disabled>Plan Actuel</button>
+                    <button class="btn-plan btn-outline" id="btn-starter" onclick="checkout('starter')">Choisir Starter</button>
                 </div>
 
                 <!-- Pro -->
-                <div class="pricing-card featured">
-                    <div class="plan-badge badge-popular">Populaire</div>
+                <div class="pricing-card featured" id="card-pro">
+                    <div class="plan-badge badge-popular" id="badge-pro">Populaire</div>
                     <div class="plan-name">Pro</div>
-                    <div class="plan-price">59€<span>/mois</span></div>
+                    <div class="plan-price">69€<span>/mois</span></div>
                     <ul class="features-list">
                         <li><i class="fa-solid fa-check"></i> 2 Salons de coiffure</li>
                         <li><i class="fa-solid fa-check"></i> Tout du plan Starter</li>
@@ -164,14 +165,14 @@
                         <li><i class="fa-solid fa-check"></i> Support Prioritaire</li>
                         <li><i class="fa-solid fa-check"></i> Personnalisation couleurs</li>
                     </ul>
-                    <button class="btn-plan btn-primary" onclick="alert('Contactez-nous pour passer au plan Pro !')">Passer au Pro</button>
+                    <button class="btn-plan btn-primary" id="btn-pro" onclick="checkout('pro')">Passer au Pro</button>
                 </div>
 
                 <!-- Premium -->
-                <div class="pricing-card premium">
-                    <div class="plan-badge badge-new">Nouveau</div>
+                <div class="pricing-card premium" id="card-premium">
+                    <div class="plan-badge badge-new" id="badge-premium">Nouveau</div>
                     <div class="plan-name">Premium</div>
-                    <div class="plan-price">75€<span>/mois</span></div>
+                    <div class="plan-price">89€<span>/mois</span></div>
                     <ul class="features-list">
                         <li><i class="fa-solid fa-check"></i> 3 Salons ou +</li>
                         <li><i class="fa-solid fa-check"></i> Tout du plan Pro</li>
@@ -179,7 +180,7 @@
                         <li><i class="fa-solid fa-check"></i> Support VIP 24/7</li>
                         <li><i class="fa-solid fa-check"></i> Account Manager dédié</li>
                     </ul>
-                    <button class="btn-plan btn-white" onclick="alert('Contactez-nous pour l\'offre Premium !')">Contacter les ventes</button>
+                    <button class="btn-plan btn-white" id="btn-premium" onclick="checkout('premium')">Choisir Premium</button>
                 </div>
             </div>
 
@@ -242,6 +243,118 @@
 
     <script>
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+        const stripe = Stripe('pk_test_51QO7j0GzX8q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3q3'); // Placeholder
+
+        document.addEventListener('DOMContentLoaded', fetchSubscriptionStatus);
+
+        function getUsername() {
+            const userStr = localStorage.getItem('user');
+            const adminLoggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
+            
+            if (userStr) {
+                return JSON.parse(userStr).username;
+            } else if (adminLoggedIn) {
+                return sessionStorage.getItem('admin_name');
+            }
+            return null;
+        }
+
+        async function fetchSubscriptionStatus() {
+            try {
+                const username = getUsername();
+                if (!username) return;
+
+                const response = await fetch(`/api/api-subscription-status?username=${username}`);
+                const data = await response.json();
+
+                if (data.active && data.plan) {
+                    const planName = data.plan.name.toLowerCase(); // 'starter', 'pro', 'premium'
+                    markPlanAsActive(planName);
+                }
+            } catch (e) {
+                console.error('Error fetching subscription:', e);
+            }
+        }
+
+        function markPlanAsActive(plan) {
+            const btn = document.getElementById(`btn-${plan}`);
+            const card = document.getElementById(`card-${plan}`);
+            
+            if (btn) {
+                btn.textContent = 'Plan Actuel';
+                btn.disabled = true;
+                btn.classList.remove('btn-primary', 'btn-white', 'btn-outline');
+                btn.classList.add('btn-disabled');
+                btn.removeAttribute('onclick');
+            }
+
+            // Handle badges
+            const defaultBadge = card.querySelector('.plan-badge:not(.badge-current)');
+            if (defaultBadge) defaultBadge.style.display = 'none';
+
+            let currentBadge = card.querySelector('.badge-current');
+            if (!currentBadge) {
+                currentBadge = document.createElement('div');
+                currentBadge.className = 'plan-badge badge-current';
+                currentBadge.textContent = 'Actuel';
+                card.insertBefore(currentBadge, card.firstChild);
+            }
+            currentBadge.style.display = 'block';
+        }
+
+        async function checkout(plan) {
+            const username = getUsername();
+
+            if (!username) {
+                alert('Veuillez vous connecter pour souscrire à un plan.');
+                return;
+            }
+
+            let email = 'client@example.com'; // Default
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                const u = JSON.parse(userStr);
+                if (u.email) email = u.email;
+            }
+            
+            try {
+                const response = await fetch('/api/api-create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        plan: plan,
+                        email: email,
+                        salonName: 'Salon Moderne',
+                        username: username
+                    }),
+                });
+
+                const session = await response.json();
+
+                if (session.error) {
+                    alert(session.error);
+                    return;
+                }
+
+                if (session.url) {
+                    window.location.href = session.url;
+                } else {
+                    const result = await stripe.redirectToCheckout({
+                        sessionId: session.sessionId,
+                    });
+    
+                    if (result.error) {
+                        alert(result.error.message);
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Une erreur est survenue.');
+            }
+        }
     </script>
 </body>
 </html>

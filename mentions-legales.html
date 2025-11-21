@@ -5,188 +5,127 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mentions Légales - TimeToBook</title>
     <meta name="description" content="Mentions légales de TimeToBook - Solution de réservation en ligne pour salons de coiffure.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #4338ca;
+            --secondary: #10B981;
+            --dark: #111827;
+            --gray: #6B7280;
+            --light: #F3F4F6;
+            --white: #FFFFFF;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 12px;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #ffffff;
-            min-height: 100vh;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #FAFAFA; color: var(--dark); line-height: 1.6; overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh; }
 
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
-        }
+        /* Navbar */
+        .navbar { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 1rem 0; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .nav-container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a { color: var(--gray); text-decoration: none; font-weight: 500; transition: color 0.2s; font-size: 0.95rem; }
+        .nav-links a:hover { color: var(--primary); }
+        .btn-contact { background: var(--primary); color: white !important; padding: 0.75rem 1.5rem; border-radius: 9999px; font-weight: 600; transition: all 0.3s; box-shadow: var(--shadow-md); }
+        .btn-contact:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
 
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        /* Footer */
+        .footer { background: white; padding: 4rem 2rem 2rem; border-top: 1px solid rgba(0,0,0,0.05); text-align: center; margin-top: auto; }
+        .footer-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap; }
+        .footer-links a { color: var(--gray); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--primary); }
+        .copyright { color: #9CA3AF; font-size: 0.9rem; }
 
-        .logo {
-            font-size: 2em;
-            font-weight: bold;
-            color: white;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            text-decoration: none;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            opacity: 0.95;
-        }
-
-        .nav-links a:hover {
-            opacity: 1;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 60px auto;
-            padding: 0 40px 80px 40px;
-        }
-
-        .legal-header {
-            text-align: center;
-            padding: 80px 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            margin: 0 -40px 60px -40px;
-        }
-
-        .legal-header h1 {
-            font-size: 3em;
-            margin-bottom: 15px;
-        }
-
-        .legal-header p {
-            font-size: 1.1em;
-            opacity: 0.95;
-        }
-
-        .legal-content {
-            background: white;
-        }
-
-        .legal-section {
-            margin-bottom: 40px;
-        }
-
-        .legal-section h2 {
-            color: #343a40;
-            font-size: 1.8em;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #667eea;
-        }
-
-        .legal-section h3 {
-            color: #495057;
-            font-size: 1.3em;
-            margin: 25px 0 15px 0;
-        }
-
-        .legal-section p {
-            color: #6c757d;
-            line-height: 1.8;
-            margin-bottom: 15px;
-            text-align: justify;
-        }
-
-        .legal-section ul {
-            margin-left: 30px;
-            color: #6c757d;
-            line-height: 1.8;
-        }
-
-        .legal-section li {
-            margin-bottom: 10px;
-        }
-
-        .info-box {
-            background: #f0f4ff;
-            border-left: 4px solid #667eea;
-            padding: 20px;
-            margin: 25px 0;
-            border-radius: 8px;
-        }
-
-        .info-box p {
-            margin-bottom: 8px;
-            text-align: left;
-        }
-
-        .info-box strong {
-            color: #343a40;
-        }
-
-        .footer {
-            background: #f8f9fa;
-            color: #6c757d;
-            text-align: center;
-            padding: 40px;
-            margin-top: 80px;
-            border-top: 2px solid #e9ecef;
-        }
-
-        .footer p {
-            margin-bottom: 10px;
-        }
-
-        .footer a {
-            color: #6c757d;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .footer a:hover {
-            color: #667eea;
-        }
-
+        /* Page Headers */
+        .page-header { background: white; padding: 4rem 2rem; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .page-title { font-size: 2.5rem; font-weight: 800; color: var(--dark); margin-bottom: 1rem; }
+        .page-subtitle { color: var(--gray); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+        
+        .content-container { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
+        
+        /* Legal Styles (Adapting old classes) */
+        .legal-section { margin-bottom: 3rem; background: white; padding: 2rem; border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid rgba(0,0,0,0.05); }
+        .legal-section h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--dark); border-bottom: 2px solid var(--light); padding-bottom: 0.5rem; }
+        .legal-section h3 { font-size: 1.2rem; font-weight: 600; margin: 1.5rem 0 1rem; color: var(--dark); }
+        .legal-section p { margin-bottom: 1rem; color: var(--gray); }
+        .legal-section ul, .legal-section ol { margin-left: 1.5rem; margin-bottom: 1rem; color: var(--gray); }
+        .legal-section li { margin-bottom: 0.5rem; }
+        .info-box { background: #EEF2FF; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--primary); margin: 1.5rem 0; }
+        .warning-box { background: #FEF3C7; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #F59E0B; margin: 1.5rem 0; color: #92400E; }
+        
+        /* Contact Styles (Adapting old classes) */
+        .contact-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-bottom: 3rem; }
+        .info-card { background: white; padding: 2rem; border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid rgba(0,0,0,0.05); text-align: center; transition: transform 0.2s; }
+        .info-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+        .info-icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+        .info-card h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--dark); }
+        .info-card a { color: var(--primary); text-decoration: none; font-weight: 600; }
+        
+        .form-container { background: white; padding: 3rem; border-radius: var(--radius); box-shadow: var(--shadow-md); border: 1px solid rgba(0,0,0,0.05); }
+        .form-container h2 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--dark); text-align: center; }
+        .form-container .subtitle { text-align: center; color: var(--gray); margin-bottom: 2rem; }
+        
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--dark); font-size: 0.95rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.875rem; border: 1px solid #E5E7EB; border-radius: 8px; font-family: inherit; transition: all 0.2s; background: var(--light); }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        .form-group input.error, .form-group select.error, .form-group textarea.error { border-color: #EF4444; }
+        .error-message { color: #EF4444; font-size: 0.85rem; margin-top: 0.25rem; display: none; }
+        .error-message.show { display: block; }
+        
+        .btn-submit { width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 1rem; margin-top: 1rem; }
+        .btn-submit:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+        
+        .success-message { display: none; background: #ECFDF5; color: #065F46; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #A7F3D0; text-align: center; }
+        .success-message.show { display: block; }
+        
         @media (max-width: 768px) {
-            .legal-header h1 {
-                font-size: 2em;
-            }
-
-            .container {
-                padding: 0 20px 60px 20px;
-            }
+            .nav-links { display: none; }
+            .page-title { font-size: 2rem; }
+            .form-row { grid-template-columns: 1fr; }
+            .form-container { padding: 1.5rem; }
         }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="./" class="logo">⏰ TimeToBook</a>
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-clock"></i> TimeToBook
+            </a>
             <div class="nav-links">
-                <a href="./">← Retour à l'accueil</a>
+                <a href="index.html#accueil">Accueil</a>
+                <a href="index.html#salons">Nos Salons</a>
+                <a href="index.html#fonctionnalites">Fonctionnalités</a>
+                <a href="contact.html" class="btn-contact">
+                    <i class="fa-solid fa-phone"></i> Demander un devis
+                </a>
             </div>
         </div>
     </nav>
 
-    <div class="legal-header">
-        <h1>📋 Mentions Légales</h1>
-        <p>Informations légales concernant TimeToBook</p>
+    <div class="page-header">
+        <h1 class="page-title">Mentions Légales</h1>
+        <p class="page-subtitle">Informations légales concernant TimeToBook</p>
     </div>
 
-    <div class="container">
-        <div class="legal-content">
+    <div class="content-container">
+        
             <div class="legal-section">
                 <h2>1. Éditeur du site</h2>
                 <div class="info-box">
@@ -319,17 +258,21 @@
             <p style="text-align: center; color: #6c757d; margin-top: 40px; font-size: 0.9em;">
                 <em>Dernière mise à jour : 13 novembre 2025</em>
             </p>
-        </div>
-    </div>
 
+    </div>
+    
     <footer class="footer">
-        <p>© 2025 TimeToBook - Tous droits réservés</p>
-        <p style="margin-top: 10px;">
-            <a href="./">Accueil</a> | 
-            <a href="./mentions-legales.html">Mentions légales</a> | 
-            <a href="./cgu.html">CGU</a> | 
-            <a href="./contact.html">Contact</a>
+        <div class="footer-links">
+            <a href="contact.html">Contact</a>
+            <a href="index.html#salons">Salons</a>
+            <a href="index.html#fonctionnalites">Fonctionnalités</a>
+            <a href="mentions-legales.html">Mentions légales</a>
+            <a href="cgu.html">CGU</a>
+        </div>
+        <p class="copyright">
+            © 2025 TimeToBook. Fait avec <i class="fa-solid fa-heart" style="color: #e11d48;"></i> à Paris.
         </p>
     </footer>
+
 </body>
 </html>

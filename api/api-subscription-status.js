@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
     }
 
     try {
-        const { rows } = await db.query('SELECT stripe_customer_id, stripe_subscription_id FROM users WHERE username = $1', [username]);
+        const { rows } = await db.query('SELECT stripe_customer_id, stripe_subscription_id, created_at FROM users WHERE username = $1', [username]);
         
         if (rows.length === 0) {
             return res.status(404).json({ error: 'User not found' });
@@ -23,21 +23,76 @@ module.exports = async (req, res) => {
 
         const user = rows[0];
 
+        // Check for Free Trial (30 days)
+        const createdAt = new Date(user.created_at);
+        const now = new Date();
+        const trialDuration = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
+        const trialEndDate = new Date(createdAt.getTime() + trialDuration);
+        const isTrialActive = now < trialEndDate;
+
         if (!user.stripe_customer_id) {
-            return res.json({ status: 'none' });
+            if (isTrialActive) {
+                return res.json({
+                    status: 'trialing',
+                    plan: { name: 'Essai Gratuit', price: 0, interval: '30 jours' },
+                    current_period_end: trialEndDate,
+                    trial_end: trialEndDate,
+                    cancel_at_period_end: false,
+                    payment_method: null,
+                    invoices: []
+                });
+            } else {
+                return res.json({
+                    status: 'expired',
+                    plan: { name: 'Aucun (Expiré)', price: 0, interval: '-' },
+                    current_period_end: null,
+                    trial_end: null,
+                    cancel_at_period_end: false,
+                    payment_method: null,
+                    invoices: []
+                });
+            }
         }
 
         // Fetch Subscription
         let subscription = null;
         if (user.stripe_subscription_id) {
             subscription = await stripe.subscriptions.retrieve(user.stripe_subscription_id);
+        } else {
+             // Customer exists but no subscription ID in DB
+             // Check if they are still in trial
+             if (isTrialActive) {
+                return res.json({
+                    status: 'trialing',
+                    plan: { name: 'Essai Gratuit', price: 0, interval: '30 jours' },
+                    current_period_end: trialEndDate,
+                    trial_end: trialEndDate,
+                    cancel_at_period_end: false,
+                    payment_method: null, // Might have a payment method attached but no sub
+                    invoices: []
+                });
+             }
         }
 
         // Fetch Payment Methods
-        const paymentMethods = await stripe.paymentMethods.list({
+        let paymentMethods = await stripe.paymentMethods.list({
             customer: user.stripe_customer_id,
             type: 'card',
         });
+
+        // If no payment methods found on customer, check subscription default
+        if (paymentMethods.data.length === 0 && subscription && subscription.default_payment_method) {
+            const pmId = typeof subscription.default_payment_method === 'string' 
+                ? subscription.default_payment_method 
+                : subscription.default_payment_method.id;
+                
+            if (pmId) {
+                const pm = await stripe.paymentMethods.retrieve(pmId);
+                if (pm) {
+                    paymentMethods = { data: [pm] };
+                }
+            }
+        }
 
         // Fetch Invoices
         const invoices = await stripe.invoices.list({

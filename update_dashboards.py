@@ -211,35 +211,6 @@ template = r"""<!DOCTYPE html>
                 </div>
             </div>
 
-            <!-- Payment Methods -->
-            <div class="content-card">
-                <div class="section-header">
-                    <div class="section-title"><i class="fa-solid fa-wallet" style="color: var(--primary);"></i> Moyens de paiement</div>
-                </div>
-                
-                <div id="payment-card-container" class="payment-card" style="display: none;">
-                    <div class="card-details">
-                        <div class="card-icon" id="card-brand-icon"><i class="fa-brands fa-cc-visa"></i></div>
-                        <div class="card-text">
-                            <strong id="card-last4">•••• •••• •••• 4242</strong>
-                            <span id="card-exp">Expire 12/2027</span>
-                        </div>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn-card" onclick="openEditCardModal()">Modifier</button>
-                        <button class="btn-card" onclick="deleteCard()" style="background: rgba(220, 38, 38, 0.2); border-color: rgba(220, 38, 38, 0.3); color: #fca5a5;">Supprimer</button>
-                    </div>
-                </div>
-
-                <div id="no-payment-method" style="display: none; text-align: center; padding: 2rem; color: var(--text-muted);">
-                    Aucun moyen de paiement enregistré.
-                </div>
-
-                <button class="add-card-btn" onclick="openAddCardModal()">
-                    <i class="fa-solid fa-plus"></i> Ajouter une carte bancaire
-                </button>
-            </div>
-
             <!-- Invoices -->
             <div class="content-card">
                 <div class="section-header">
@@ -331,21 +302,29 @@ template = r"""<!DOCTYPE html>
 
         function cancelSubscription() {
             if (confirm('⚠️ Êtes-vous sûr de vouloir résilier votre abonnement ?')) {
-                alert('✅ Résiliation confirmée. Votre accès reste actif jusqu\\'au 14 décembre 2025.');
+                alert('✅ Résiliation confirmée. Votre accès reste actif jusqu\'au 14 décembre 2025.');
             }
         }
 
         // Fetch Subscription Data
         document.addEventListener('DOMContentLoaded', async () => {
+            let username = null;
             const userStr = localStorage.getItem('user');
-            if (!userStr) {
+            const adminLoggedIn = sessionStorage.getItem('admin_logged_in') === 'true';
+            
+            if (userStr) {
+                username = JSON.parse(userStr).username;
+            } else if (adminLoggedIn) {
+                username = sessionStorage.getItem('admin_name');
+            }
+
+            if (!username) {
                 window.location.href = '../index.html';
                 return;
             }
-            const user = JSON.parse(userStr);
             
             try {
-                const response = await fetch(`/api/api-subscription-status?username=${user.username}`);
+                const response = await fetch(`/api/api-subscription-status?username=${username}`);
                 const data = await response.json();
 
                 if (data.error) {

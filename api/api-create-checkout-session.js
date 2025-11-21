@@ -54,7 +54,6 @@ module.exports = async (req, res) => {
         username: username // Pass username to link later
       },
       subscription_data: {
-        trial_period_days: 14,
         metadata: {
           salonName: salonName,
           plan: plan,

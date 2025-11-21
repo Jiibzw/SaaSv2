@@ -35,7 +35,7 @@ app.use(express.static(path.join(__dirname, '.')));
 
 // API Routes
 // Note: We map the routes to match the Vercel file structure or expected endpoints
-app.all('/api/create-checkout-session', wrapVercelFunction(require('./api/api-create-checkout-session')));
+app.all('/api/api-create-checkout-session', wrapVercelFunction(require('./api/api-create-checkout-session')));
 app.all('/api/webhook', wrapVercelFunction(require('./api/api-webhook')));
 app.all('/api/attach-payment-method', wrapVercelFunction(require('./api/api-attach-payment-method')));
 app.all('/api/cancel-subscription', wrapVercelFunction(require('./api/api-cancel-subscription')));
@@ -44,6 +44,12 @@ app.all('/api/cancel-subscription', wrapVercelFunction(require('./api/api-cancel
 app.all('/api/api-coiffeurs', wrapVercelFunction(require('./api/api-coiffeurs')));
 app.all('/api/api-bookings', wrapVercelFunction(require('./api/api-bookings')));
 app.all('/api/api-auth', wrapVercelFunction(require('./api/api-auth')));
+app.all('/api/api-subscription-status', wrapVercelFunction(require('./api/api-subscription-status')));
+
+// Handle success page
+app.get('/success', (req, res) => {
+    res.sendFile(path.join(__dirname, 'success.html'));
+});
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
